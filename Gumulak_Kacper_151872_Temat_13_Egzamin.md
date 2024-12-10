@@ -1,4 +1,4 @@
-# opis tematu oraz link do repozytorium
+# Opis tematu oraz link do repozytorium:
 
 Na wydziale X pewnej uczelni studiują studenci na K kierunkach (K>=5). Na każdym z kierunków
 studiuje Ni (80<=Ni<=160) studentów.
