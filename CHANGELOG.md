@@ -9,3 +9,6 @@
 
 11.12.24
 - Stworzenie wstępnej struktury (Dziekan, Komisja, Student)
+
+9.01.25
+- Konfiguracja wstępnej struktury stworzonej w VS 2022 pod pracę z WSL 2
