@@ -1,4 +1,4 @@
-ï»¿#include <cstdlib>
+#include <cstdlib>
 #include <ctime>
 #include "utils.h"
 #include "structures.h"
@@ -11,7 +11,7 @@ int main()
 
 	cout << "Student o ID = " << student_id << " gotowy na egzamin..." << endl;
 
-	// obsÅ‚uga komunikacji z dziekanem i komisjÄ…
+	// obs³uga komunikacji z dziekanem i komisj¹
 
 	return 0;
 }

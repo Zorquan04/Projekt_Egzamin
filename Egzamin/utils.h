@@ -10,5 +10,3 @@ using namespace std;
 void handle_error(const string&);
 
 #endif
-
-//asdasdad
