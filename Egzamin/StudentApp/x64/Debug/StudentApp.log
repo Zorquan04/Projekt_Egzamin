@@ -1,7 +1,0 @@
-﻿  exam_logic.cpp
-  ipc.cpp
-  utils.cpp
-  main_student.cpp
-C:\Users\kacpe\source\repos\Egzamin\StudentApp\main_student.cpp(9,12): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
-  Generowanie kodu...
-  StudentApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\x64\Debug\StudentApp.exe
