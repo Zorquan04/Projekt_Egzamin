@@ -12,3 +12,6 @@
 
 9.01.25
 - Konfiguracja wstępnej struktury stworzonej w VS 2022 pod pracę z WSL 2
+
+10.01.25
+- Rozwój IPC (semafory, kolejka komunikatów, pamięć współdzielona)
