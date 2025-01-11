@@ -15,3 +15,6 @@
 
 10.01.25
 - Rozwój IPC (semafory, kolejka komunikatów, pamięć współdzielona)
+
+11.01.25
+- Rozwinięcie funkcji generującej studentów, symulującej odpowiedzi studentów oraz wystawianie ocen za egzamin
