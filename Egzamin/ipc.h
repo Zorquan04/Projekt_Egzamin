@@ -6,6 +6,8 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include <sys/msg.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 key_t generate_key(const string&, int);
 

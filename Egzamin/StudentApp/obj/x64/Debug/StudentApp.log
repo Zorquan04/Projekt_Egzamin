@@ -4,12 +4,6 @@
   Weryfikowanie architektury
   Rozpoczynanie kompilacji zdalnej
   Kompilowanie źródeł:
-  exam_logic.cpp
-  ipc.cpp
-  utils.cpp
   main_student.cpp
-C:\Users\kacpe\source\repos\Egzamin\StudentApp\main_student.cpp(9,19): warning : conversion from ‘time_t’ {aka ‘long int’} to ‘unsigned int’ may change value [-Wconversion]
-C:\Users\kacpe\source\repos\Egzamin\StudentApp\main_student.cpp(9,19): warning :     9 |         srand(time(nullptr)); // inicjalizacja generatora losowego
-C:\Users\kacpe\source\repos\Egzamin\StudentApp\main_student.cpp(9,19): warning :       |               ~~~~^~~~~~~~~
   Łączenie obiektów
   StudentApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\StudentApp\bin\x64\Debug\StudentApp.out

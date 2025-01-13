@@ -4,9 +4,6 @@
   Weryfikowanie architektury
   Rozpoczynanie kompilacji zdalnej
   Kompilowanie źródeł:
-  exam_logic.cpp
-  ipc.cpp
-  utils.cpp
   main_dean.cpp
   Łączenie obiektów
   DeanApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\DeanApp\bin\x64\Debug\DeanApp.out

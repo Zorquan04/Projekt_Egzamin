@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <cerrno>
+#include <algorithm>
 using namespace std;
 
 void handle_error(const string&);

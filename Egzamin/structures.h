@@ -1,7 +1,8 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H // definicje struktur danych
 
-#include <string>
+#include "utils.h"
+#include <sstream>
 #include <vector>
 
 struct Student // struktura studenta
@@ -16,11 +17,15 @@ struct Student // struktura studenta
 	Student() : id(0), direction(0), practic_pass(false), theoric_pass(false), practic_grade(0.0), theoric_grade(0.0) {} // konstruktor domyœlny
 };
 
+ostream& operator<<(ostream& os, const Student& student); // deklaracja operatora << dla struktury Student
+
 struct Exam_result // struktura do komunikacji z dziekanem
 {
 	int student_id; // id studenta zdaj¹cego egzamin
 	float final_grade; // finalna ocena za ca³y egzamin
 	bool passed; // czy zdany
+
+	Exam_result() : student_id(0), final_grade(0.0), passed(false) {} // konstruktor domyœlny
 };
 
 #endif

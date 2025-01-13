@@ -2,7 +2,9 @@
 #define EXAM_LOGIC_H
 
 #include "structures.h"
-using namespace std;
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 
 void generate_students(int, int, int, vector<Student>&); // losowanie studentów na podstawie liczby kierunków oraz liczby studentów na ka¿dym z kierunków
 

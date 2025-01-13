@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "Nowy Profil",
+    "Projects": [
+      {
+        "Path": "DeanApp\\DeanApp.vcxproj",
+        "Action": "Start",
+        "DebugTarget": "172.28.167.90 (x64)"
+      },
+      {
+        "Path": "CommissionApp\\CommissionApp.vcxproj",
+        "Action": "Start",
+        "DebugTarget": "172.28.167.90 (x64)"
+      },
+      {
+        "Path": "StudentApp\\StudentApp.vcxproj",
+        "Action": "Start",
+        "DebugTarget": "172.28.167.90 (x64)"
+      }
+    ]
+  }
+]

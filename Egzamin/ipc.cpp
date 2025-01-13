@@ -1,7 +1,4 @@
 #include "ipc.h"
-#include "utils.h"
-#include <sys/types.h>
-#include <unistd.h>
 
 // generowanie klucza IPC
 key_t generate_key(const string& path, int project_id) 
@@ -41,6 +38,7 @@ int create_sem(key_t key, int semnum)
 {
     int semid = semget(key, semnum, IPC_CREAT | 0666); // tworzy zestaw semaforów o podanym kluczu i liczbie semaforów
     if (semid == -1) handle_error("Blad podczas tworzenia semaforow");
+    
     return semid;
 }
 
@@ -54,7 +52,7 @@ void sem_wait(int semid, int semnum)
 void sem_signal(int semid, int semnum) 
 {
     struct sembuf operation = { static_cast<unsigned short>(semnum), 1, 0 }; // operacja V (inkrementacja) na semaforze (zwiêksza jego wartoœæ o 1, odblokowuj¹c, jeœli procesy czekaj¹).
-    if (semop(semid, &operation, 1) == -1) handle_error("Nie uda³o siê wykonaæ operacji signal na semaforze");
+    if (semop(semid, &operation, 1) == -1) handle_error("Nie udalo sie wykonac operacji signal na semaforze");
 }
 
 void destroy_sem(int semid) 
@@ -80,7 +78,7 @@ void send_msg(int msgid, long mtype, const string& text) // wys³anie komunikatu 
 
     msg.mtype = mtype; // ustawienie typu
     strncpy(msg.mtext, text.c_str(), sizeof(msg.mtext) - 1); // kopiowanie treœci
-    msg.mtext[sizeof(msg.mtext) - 1] = '\0'; // gwarancja zakoñczenia ³añcucha '\0'
+    msg.mtext[sizeof(msg.mtext) - 1] = '\0'; // gwarancja poprawnego zakoñczenia ³añcucha
 
     if (msgsnd(msgid, &msg, sizeof(msg.mtext), 0) == -1)
         handle_error("Blad podczas wysylania wiadomosci");
@@ -96,6 +94,7 @@ string receive_msg(int msgid, long mtype) // odebranie komunikatu o okreœlonym t
 
     if (msgrcv(msgid, &msg, sizeof(msg.mtext), mtype, 0) == -1)
         handle_error("Blad podczas odbierania wiadomosci");
+
     return string(msg.mtext); // zwrócenie treœci komunikatu jako string
 }
 
