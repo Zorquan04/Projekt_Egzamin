@@ -18,3 +18,6 @@
 
 11.01.25
 - Rozwinięcie funkcji generującej studentów, symulującej odpowiedzi studentów oraz wystawianie ocen za egzamin
+
+13.01.25
+- Rozwinięcie funkcji main dziekana, komisji oraz studenta - zaimplementowanie podstawowego przebiegu egzaminu
