@@ -21,3 +21,6 @@
 
 13.01.25
 - Rozwinięcie funkcji main dziekana, komisji oraz studenta - zaimplementowanie podstawowego przebiegu egzaminu
+
+14.01.25
+- Wprowadzenie poprawek i rozwinięć o dodatkowe funkcjonalności (input użytkownika, wyświetlanie informacji itd)
