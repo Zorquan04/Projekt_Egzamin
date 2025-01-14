@@ -5,9 +5,11 @@
 #include <cstring>
 #include <string>
 #include <cerrno>
+#include <limits>
 #include <algorithm>
 using namespace std;
 
 void handle_error(const string&);
+int get_direction();
 
 #endif

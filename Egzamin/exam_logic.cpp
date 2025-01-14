@@ -1,4 +1,5 @@
 #include "exam_logic.h"
+#include "structures.h"
 
 void generate_students(int num_directions, int min_students, int max_students, vector<Student>& students)
 {
@@ -16,17 +17,44 @@ void generate_students(int num_directions, int min_students, int max_students, v
 			student.practic_pass = false; // wstêpna ocena za praktykê studenta - pocz¹tkowo nie zdane
 			student.theoric_pass = false; // wstêpna ocena za teoriê studenta - pocz¹tkowo nie zdane
 			students.push_back(student); // dodanie studenta do listy
+
+			// symulacja losowego czasu pojawiania siê studentów
+			int delay = rand() % 91 + 10; // losowy czas w milisekundach (10-100 ms)
+			usleep(delay * 1000); // konwersja na mikrosekundy
+			cout << students.back() << endl; // odwo³anie do ostatnio dodanego indeksu w wektorze w celu jego wyœwietlenia
 		}
 	}
 }
 
 void simulate_answers(Student& student)
 {
-	student.practic_grade = static_cast<float>(rand() % 7 / 2.0 + 2.0); // losowanie oceny za odpowiedzi z Komisji A (praktyka)
-	student.theoric_grade = static_cast<float>(rand() % 7 / 2.0 + 2.0); // losowanie oceny za odpowiedzi z Komisji B (teoria)
+	// losowanie liczby z przedzia³u 0-99 w celu ustalenia, czy ocena bêdzie pozytywna
+	int random_practic = rand() % 100;
+	int random_theoric = rand() % 100;
 
-	student.practic_pass = (student.practic_grade > 2.0); // przydzielanie zaliczenia (true) jeœli ocena za praktyczny wy¿sza ni¿ 2.0
-	student.theoric_pass = (student.theoric_grade > 2.0); // przydzielanie zaliczenia (true) jeœli ocena za teoretyczny wy¿sza ni¿ 2.0
+	// losowanie oceny dla praktyki
+	if (random_practic < 95) // 95% szans na ocenê pozytywn¹
+	{
+		student.practic_grade = static_cast<float>(3.0 + rand() % 5 * 0.5); // losuje ocenê od 3.0 do 5.0
+	}
+	else // 5% szans na ocenê negatywn¹
+	{
+		student.practic_grade = 2.0;
+	}
+
+	// losowanie oceny dla teorii
+	if (random_theoric < 95)
+	{
+		student.theoric_grade = static_cast<float>(3.0 + rand() % 5 * 0.5);
+	}
+	else
+	{
+		student.theoric_grade = 2.0;
+	}
+
+	// przydzielanie zaliczeñ (jeœli 2.0 zwraca false)
+	student.practic_pass = (student.practic_grade > 2.0);
+	student.theoric_pass = (student.theoric_grade > 2.0);
 }
 
 float calculate_final_grade(const Student& student)

@@ -2,6 +2,7 @@
 #define EXAM_LOGIC_H
 
 #include "structures.h"
+#include <unistd.h>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>

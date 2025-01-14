@@ -14,21 +14,21 @@ DEAN_MAIN = $(DEAN_DIR)/DeanApp/main_dean.cpp
 COMMISSION_MAIN = $(COMMISSION_DIR)/CommissionApp/main_commission.cpp
 
 # Wspólne pliki Ÿród³owe i obiekty
-COMMON_SRCS = utils.cpp ipc.cpp exam_logic.cpp
+COMMON_SRCS = utils.cpp ipc.cpp exam_logic.cpp structures.cpp
 STUDENT_OBJS = $(addprefix $(STUDENT_DIR)/, $(COMMON_SRCS:.cpp=.o))
 DEAN_OBJS = $(addprefix $(DEAN_DIR)/, $(COMMON_SRCS:.cpp=.o))
 COMMISSION_OBJS = $(addprefix $(COMMISSION_DIR)/, $(COMMON_SRCS:.cpp=.o))
 
 # Cele
-all: student_app dean_app commission_app
+all: student dean commission
 
-student_app: $(STUDENT_OBJS) $(STUDENT_MAIN)
+student: $(STUDENT_OBJS) $(STUDENT_MAIN)
 	$(CXX) $(CXXFLAGS) -o $@ $(STUDENT_MAIN) $(STUDENT_OBJS)
 
-dean_app: $(DEAN_OBJS) $(DEAN_MAIN)
+dean: $(DEAN_OBJS) $(DEAN_MAIN)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEAN_MAIN) $(DEAN_OBJS)
 
-commission_app: $(COMMISSION_OBJS) $(COMMISSION_MAIN)
+commission: $(COMMISSION_OBJS) $(COMMISSION_MAIN)
 	$(CXX) $(CXXFLAGS) -o $@ $(COMMISSION_MAIN) $(COMMISSION_OBJS)
 
 # Regu³a dla wspólnych plików .o
@@ -36,4 +36,4 @@ commission_app: $(COMMISSION_OBJS) $(COMMISSION_MAIN)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(STUDENT_DIR)/*.o $(DEAN_DIR)/*.o $(COMMISSION_DIR)/*.o student_app dean_app commission_app
+	rm -f $(STUDENT_DIR)/*.o $(DEAN_DIR)/*.o $(COMMISSION_DIR)/*.o student dean commission

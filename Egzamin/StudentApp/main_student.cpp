@@ -6,13 +6,12 @@
 
 int main()
 {
+    cout << "Rozpoczecie przybywania studentow na miejsce..." << endl << endl;
     // wygenerowanie wszystkich studentów
 	vector<Student> students; // wektor przechowuj¹cy wszystkich studentów - lista
 	generate_students(NUM_DIRECTIONS, MIN_STUDENTS, MAX_STUDENTS, students);
 
-    sleep(2);
-
-    cout << "Studenci przybyli na egzamin." << endl << endl;
+    cout << endl << "Wszyscy studenci przybyli na egzamin." << endl << endl;
 
     // tworzenie kolejki komunikatów oraz semaforów
     key_t key_com = generate_key("/home/zorquan/projects/Keyfile", 16); // inicjalizacja kolejki komunikatów z komisj¹
@@ -26,11 +25,11 @@ int main()
 
     // odebranie informacji od dziekana na temat kierunku, który podchodzi do egzaminu
     string direction_msg = receive_msg(msgid_dean, 3); // oczekiwanie na informacjê od dziekana na temat kierunku
-    usleep(100000);
-    cout << "Studenci dowiedzieli sie, ktory kierunek pisze egzamin." << endl;
+    sleep(1);
+    cout << "Studenci dowiedzieli sie, ktory kierunek pisze egzamin." << endl << endl;
     int target_direction = stoi(direction_msg);
 
-    sleep(1);
+    sleep(2);
 
     // filtrowanie studentów wed³ug kierunku - lista studentów przystêpuj¹cych do egzaminu
     vector<Student> filtered_students;
@@ -42,9 +41,11 @@ int main()
 
     cout << "Lista ID studentow podchodzacych do egzaminu:" << endl;
     for (const auto& student : filtered_students)
-        cout << student.id << endl;
+        cout << student.id << ", ";
 
-    cout << endl;
+    cout << endl << endl;
+    sleep(2);
+    cout << "Rozpoczecie przeprowadzania egzaminu..." << endl << endl;
     sleep(1);
 
     // wysy³anie studentów do komisji
@@ -65,7 +66,7 @@ int main()
 
     destroy_msg(msgid_dean); // usuniêcie kolejki komunikatów z dziekanem
 
-    cout << "Wszyscy studenci zakonczyli egzamin." << endl << endl;;
+    cout << endl << "Wszyscy studenci zakonczyli egzamin." << endl << endl;;
 
 	return 0;
 }

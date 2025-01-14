@@ -6,11 +6,7 @@
 
 int main()
 {
-	sleep(1);
-
-	cout << "Komisja gotowa do pracy." << endl;
-
-	sleep(2);
+	cout << "Komisja gotowa do pracy." << endl << endl;
 
 	// tworzenie kolejek komunikatów oraz semaforów
 	key_t key_stu = generate_key("/home/zorquan/projects/Keyfile", 16); // inicjalizacja kolejki komunikatów ze studentami
@@ -40,9 +36,7 @@ int main()
 		Student student; // struktura studenta
 
 		if (!student_msg.empty() && all_of(student_msg.begin(), student_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
-		{
 			student.id = stoi(student_msg); // student_msg zawiera id studenta
-		}
 		else
 		{
 			cerr << "Nieprawidlowy komunikat studenta: " << student_msg << endl;
@@ -64,8 +58,7 @@ int main()
 		result.passed = student.practic_pass && student.theoric_pass;
 
 		string result_msg = to_string(result.student_id) + " " +
-			to_string(result.final_grade) + " " +
-			to_string(result.passed);
+			to_string(result.final_grade) + " " + to_string(result.passed);
 
 		send_msg(msgid_dean, 2, result_msg); // wysy³anie wyników do dziekana
 
