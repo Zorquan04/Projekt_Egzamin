@@ -24,3 +24,6 @@
 
 14.01.25
 - Wprowadzenie poprawek i rozwinięć o dodatkowe funkcjonalności (input użytkownika, wyświetlanie informacji itd)
+
+19.01.25
+- Wprowadzenie kilku rozwinięć i poprawek (zwiększenie uniwersalności, szczegółowa logika względem ocen, opóźnień itd)
