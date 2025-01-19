@@ -22,10 +22,10 @@ int main()
 	cout << "Dziekan wybral kierunek, ktory podejdzie do egzaminu: " << direction << endl;
 
 	// tworzenie kolejek komunikatów
-	key_t key_stu = generate_key("/home/zorquan/projects/Keyfile", 32); // inicjalizacja kolejki komunikatów ze studentami
+	key_t key_stu = generate_key('B'); // inicjalizacja kolejki komunikatów ze studentami
 	int msgid_stu = create_msg(key_stu);
 
-	key_t key_com = generate_key("/home/zorquan/projects/Keyfile", 64); // inicjalizacja kolejki komunikatów z komisj¹
+	key_t key_com = generate_key('C'); // inicjalizacja kolejki komunikatów z komisj¹
 	int msgid_com = create_msg(key_com);
 
 	// wys³anie informacji do studentów
@@ -54,6 +54,7 @@ int main()
 		results.push_back(result); // dodanie elementu do wektora
 	}
 
+	usleep(250000);
 	cout << "Dziekan otrzymal wyniki od komisji." << endl << endl;
 	sleep(2);
 

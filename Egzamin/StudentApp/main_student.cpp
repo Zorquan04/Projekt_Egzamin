@@ -12,16 +12,30 @@ int main()
 	generate_students(NUM_DIRECTIONS, MIN_STUDENTS, MAX_STUDENTS, students);
 
     cout << endl << "Wszyscy studenci przybyli na egzamin." << endl << endl;
+    sleep(1);
+
+    // Liczenie studentów, którzy maj¹ ju¿ zdan¹ praktykê
+    int passed_practic = 0;
+    for (const auto& student : students)
+    {
+        if (student.practic_pass)
+            ++passed_practic;
+    }
+
+    cout << "Liczba studentow, ktorzy powtarzaja egzamin: " << passed_practic << endl << endl;
 
     // tworzenie kolejki komunikatów oraz semaforów
-    key_t key_com = generate_key("/home/zorquan/projects/Keyfile", 16); // inicjalizacja kolejki komunikatów z komisj¹
+    key_t key_com = generate_key('A'); // inicjalizacja kolejki komunikatów z komisj¹
     int msgid_com = create_msg(key_com);
 
-    key_t key_dean = generate_key("/home/zorquan/projects/Keyfile", 32); // inicjalizacja kolejki komunikatów z dziekanem
+    key_t key_dean = generate_key('B'); // inicjalizacja kolejki komunikatów z dziekanem
     int msgid_dean = create_msg(key_dean);
 
-    key_t sem_key = generate_key("/home/zorquan/projects/Keyfile", 128); // klucz do semaforów
+    key_t sem_key = generate_key('D'); // klucz do semaforów
     int semid = create_sem(sem_key, 2); // tworzenie zestawu 2 semaforów: 0 - komisja, 1 - studenci
+
+    usleep(500000);
+    cout << "Oczekiwanie na informacje od dziekana..." << endl;
 
     // odebranie informacji od dziekana na temat kierunku, który podchodzi do egzaminu
     string direction_msg = receive_msg(msgid_dean, 3); // oczekiwanie na informacjê od dziekana na temat kierunku

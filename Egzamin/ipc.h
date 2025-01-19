@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-key_t generate_key(const string&, int);
+key_t generate_key(int);
 
 int create_shm(key_t, size_t);
 void* attach_shm(int);

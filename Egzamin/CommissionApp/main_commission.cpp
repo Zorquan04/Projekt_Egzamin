@@ -9,13 +9,13 @@ int main()
 	cout << "Komisja gotowa do pracy." << endl << endl;
 
 	// tworzenie kolejek komunikatów oraz semaforów
-	key_t key_stu = generate_key("/home/zorquan/projects/Keyfile", 16); // inicjalizacja kolejki komunikatów ze studentami
+	key_t key_stu = generate_key('A'); // inicjalizacja kolejki komunikatów ze studentami
 	int msgid_stu = create_msg(key_stu);
 
-	key_t key_dean = generate_key("/home/zorquan/projects/Keyfile", 64); // inicjalizacja kolejki komunikatów z dziekanem
+	key_t key_dean = generate_key('C'); // inicjalizacja kolejki komunikatów z dziekanem
 	int msgid_dean = create_msg(key_dean);
 
-	key_t sem_key = generate_key("/home/zorquan/projects/Keyfile", 128); // klucz do semaforów
+	key_t sem_key = generate_key('D'); // klucz do semaforów
 	int semid = create_sem(sem_key, 2); // zestaw semaforów: 0 - komisja, 1 - studenci
 	semctl(semid, 0, SETVAL, 1);
 
@@ -39,7 +39,7 @@ int main()
 			student.id = stoi(student_msg); // student_msg zawiera id studenta
 		else
 		{
-			cerr << "Nieprawidlowy komunikat studenta: " << student_msg << endl;
+			handle_error("Nieprawidlowy komunikat studenta");
 			continue; // pomijamy b³êdny komunikat
 		}
 
@@ -47,10 +47,10 @@ int main()
 
 		simulate_answers(student); // symulujemy zadawanie pytañ i odpowiedzi
 
-		cout << "Komisja ocenila studenta o ID = " << student.id << endl;
-		cout << "Ocena za czesc teoretyczna: " << student.theoric_grade << endl;
-		cout << "Ocena za czesc praktyczna: " << student.practic_grade << endl << endl;
-
+		cout << "Komisja ocenila studenta o ID = " << student.id << ":" << endl;
+		cout << "Ocena za czesc praktyczna: " << student.practic_grade << endl;
+		cout << "Ocena za czesc teoretyczna: " << student.theoric_grade << endl << endl;
+		
 		// wystawienie oceny za egzamin
 		Exam_result result;
 		result.student_id = student.id;

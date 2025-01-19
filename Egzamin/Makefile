@@ -1,39 +1,39 @@
 # Kompilator i flagi
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -I/home/zorquan/projects/StudentApp -I/home/zorquan/projects/DeanApp -I/home/zorquan/projects/CommissionApp
+CXXFLAGS = -std=c++17 -Wall -I$(PROJECT_DIR)/StudentApp -I$(PROJECT_DIR)/DeanApp -I$(PROJECT_DIR)/CommissionApp
 
 # Lokacje folderów
-PROJECT_DIR = /home/zorquan/projects
+PROJECT_DIR = .
 STUDENT_DIR = $(PROJECT_DIR)/StudentApp
 DEAN_DIR = $(PROJECT_DIR)/DeanApp
 COMMISSION_DIR = $(PROJECT_DIR)/CommissionApp
 
-# Œcie¿ki do plików g³ównych
-STUDENT_MAIN = $(STUDENT_DIR)/StudentApp/main_student.cpp
-DEAN_MAIN = $(DEAN_DIR)/DeanApp/main_dean.cpp
-COMMISSION_MAIN = $(COMMISSION_DIR)/CommissionApp/main_commission.cpp
-
-# Wspólne pliki Ÿród³owe i obiekty
+# Pliki Ÿród³owe i nag³ówki
 COMMON_SRCS = utils.cpp ipc.cpp exam_logic.cpp structures.cpp
-STUDENT_OBJS = $(addprefix $(STUDENT_DIR)/, $(COMMON_SRCS:.cpp=.o))
-DEAN_OBJS = $(addprefix $(DEAN_DIR)/, $(COMMON_SRCS:.cpp=.o))
-COMMISSION_OBJS = $(addprefix $(COMMISSION_DIR)/, $(COMMON_SRCS:.cpp=.o))
+COMMON_OBJS = $(COMMON_SRCS:.cpp=.o)
+
+STUDENT_MAIN = StudentApp/main_student.cpp
+DEAN_MAIN = DeanApp/main_dean.cpp
+COMMISSION_MAIN = CommissionApp/main_commission.cpp
 
 # Cele
 all: student dean commission
 
-student: $(STUDENT_OBJS) $(STUDENT_MAIN)
-	$(CXX) $(CXXFLAGS) -o $@ $(STUDENT_MAIN) $(STUDENT_OBJS)
+student: $(addprefix $(STUDENT_DIR)/, $(COMMON_OBJS)) $(STUDENT_DIR)/$(STUDENT_MAIN)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-dean: $(DEAN_OBJS) $(DEAN_MAIN)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEAN_MAIN) $(DEAN_OBJS)
+dean: $(addprefix $(DEAN_DIR)/, $(COMMON_OBJS)) $(DEAN_DIR)/$(DEAN_MAIN)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-commission: $(COMMISSION_OBJS) $(COMMISSION_MAIN)
-	$(CXX) $(CXXFLAGS) -o $@ $(COMMISSION_MAIN) $(COMMISSION_OBJS)
+commission: $(addprefix $(COMMISSION_DIR)/, $(COMMON_OBJS)) $(COMMISSION_DIR)/$(COMMISSION_MAIN)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# Regu³a dla wspólnych plików .o
+# Wspólna regu³a dla plików .o
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Czyszczenie
 clean:
 	rm -f $(STUDENT_DIR)/*.o $(DEAN_DIR)/*.o $(COMMISSION_DIR)/*.o student dean commission
+
+.PHONY: all clean

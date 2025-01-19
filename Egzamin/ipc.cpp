@@ -1,9 +1,9 @@
 #include "ipc.h"
 
 // generowanie klucza IPC
-key_t generate_key(const string& path, int project_id) 
+key_t generate_key(int project_id) 
 {
-    key_t key = ftok(path.c_str(), project_id); // generuje unikalny klucz IPC na podstawie œcie¿ki oraz ID
+    key_t key = ftok(".", project_id); // generuje unikalny klucz IPC na podstawie œcie¿ki oraz ID
     if (key == -1) handle_error("Blad podczas generowania klucza IPC");
     return key;
 }
