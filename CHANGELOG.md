@@ -27,3 +27,6 @@
 
 19.01.25
 - Wprowadzenie kilku rozwinięć i poprawek (zwiększenie uniwersalności, szczegółowa logika względem ocen, opóźnień itd)
+
+22.01.25
+- Następne poprawki oraz funkcjonalności (praca z procesami, sygnałami itd)
