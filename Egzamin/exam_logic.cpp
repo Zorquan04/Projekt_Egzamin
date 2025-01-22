@@ -1,10 +1,11 @@
 #include "exam_logic.h"
 #include "structures.h"
 #include "constants.h"
+#include "ipc.h"
 
-void generate_students(int num_directions, int min_students, int max_students, vector<Student>& students)
+void generate_students(int num_directions, int min_students, int max_students, Student* students)
 {
-	srand(static_cast<unsigned int>(time(nullptr))); // inicjalizacja generatora losowego
+	srand(static_cast<unsigned int>(time(NULL))); // inicjalizacja generatora losowego
 
 	int student_id = 1; // globalny licznik dla id studentów (dla przydzielania unikalnego ID)
 	for (int direction = 0; direction < num_directions; ++direction)
@@ -15,8 +16,6 @@ void generate_students(int num_directions, int min_students, int max_students, v
 			Student student;
 			student.id = student_id++; // przydzielenie unikalnego ID studenta
 			student.direction = direction + 1; // przypisanie kierunku studiów
-			student.practic_pass = false; // wstêpna ocena za praktykê studenta - pocz¹tkowo nie zdane
-			student.theoric_pass = false; // wstêpna ocena za teoriê studenta - pocz¹tkowo nie zdane
 
 			int random_pass = rand() % 100; // losowanie liczby z przedzia³u 0-99 w celu ustalenia, czy student powtarza egzamin i ma ju¿ zaliczon¹ praktykê
 			if (random_pass >= 95) // 5% szans, ¿e student powtarza egzamin i ma ju¿ zdan¹ praktykê
@@ -24,19 +23,22 @@ void generate_students(int num_directions, int min_students, int max_students, v
 				student.practic_grade = 5.0;
 				student.practic_pass = true;
 			}
-			students.push_back(student); // dodanie studenta do listy
+			// krytyczna sekcja – dodanie studenta do pamiêci wspó³dzielonej
+			students[student.id - 1] = student;
+
+			cout << "Przybyl student ID: " << student.id << ", Kierunek: " << student.direction 
+				<< ", Powtarza egzamin: " << (student.practic_pass ? "Tak" : "Nie") << endl;
 
 			// symulacja losowego czasu pojawiania siê studentów
 			int delay = rand() % 91 + 10; // losowy czas w milisekundach (10-100 ms)
 			usleep(delay * 1000); // konwersja na mikrosekundy
-			cout << students.back() << endl; // odwo³anie do ostatnio dodanego indeksu w wektorze w celu jego wyœwietlenia
 		}
 	}
 }
 
 void simulate_answers(Student& student)
 {
-	// Symulacja zadawania pytania przez komisjê
+	// symulacja zadawania pytania przez komisjê
 	int delay_chance = rand() % 100; // losowanie liczby z przedzia³u 0 - 99 w celu ustalenia, czy komisja siê spóŸni³a z pytaniem
 	int question_delay = 0;
 	if (delay_chance > 49) // 50% szans, ¿e komisja siê spóŸni
@@ -47,7 +49,7 @@ void simulate_answers(Student& student)
 
 	cout << "Komisja zadala pytanie po " << question_delay << " ms." << endl;
 
-	// Symulacja odpowiadania studenta
+	// symulacja odpowiadania studenta
 	int answer_delay = rand() % 91 + 10; // losowy czas (10-100 ms)
 	usleep(answer_delay * 1000);
 

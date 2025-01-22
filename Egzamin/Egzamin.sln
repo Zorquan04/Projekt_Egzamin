@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{AD75E7
 		exam_logic.h = exam_logic.h
 		ipc.cpp = ipc.cpp
 		ipc.h = ipc.h
-		structures.cpp = structures.cpp
 		structures.h = structures.h
 		utils.cpp = utils.cpp
 		utils.h = utils.h

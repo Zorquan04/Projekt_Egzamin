@@ -7,7 +7,7 @@
 #include <ctime>
 #include <cmath>
 
-void generate_students(int, int, int, vector<Student>&); // losowanie studentów na podstawie liczby kierunków oraz liczby studentów na ka¿dym z kierunków
+void generate_students(int, int, int, Student*); // losowanie studentów na podstawie liczby kierunków oraz liczby studentów na ka¿dym z kierunków
 
 void simulate_answers(Student&); // symulacja odpowiedzi studenta oraz ocenianie
 

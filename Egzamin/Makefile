@@ -9,7 +9,7 @@ DEAN_DIR = $(PROJECT_DIR)/DeanApp
 COMMISSION_DIR = $(PROJECT_DIR)/CommissionApp
 
 # Pliki Ÿród³owe i nag³ówki
-COMMON_SRCS = utils.cpp ipc.cpp exam_logic.cpp structures.cpp
+COMMON_SRCS = utils.cpp ipc.cpp exam_logic.cpp
 COMMON_OBJS = $(COMMON_SRCS:.cpp=.o)
 
 STUDENT_MAIN = StudentApp/main_student.cpp

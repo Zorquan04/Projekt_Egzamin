@@ -1,14 +1,38 @@
 #include "utils.h"
+#include "ipc.h"
 
 void handle_error(const string& message) // obs³uga b³êdów
 {
-	char error_buf[256]; // bufor na komunikat b³edu
-	strerror_r(errno, error_buf, sizeof(error_buf)); // zapis komunikatu do bufora
-
-	cerr << message << ": " << error_buf << endl;
+    perror(message.c_str()); // wyœwietlenie zawartoœci b³êdu
+    raise(SIGINT); // wys³anie sygna³u przerwania
 }
 
-int get_direction()
+void send_signal(pid_t student, pid_t commission, pid_t dean) // przes³anie sygna³u o awarii oraz zakoñczenie procesów
+{
+    srand(static_cast<unsigned int>(time(NULL)));
+    int random_time = rand() % 11 + 10; // miêdzy 10 a 20s od wys³ania informacji o kierunku do studentów
+    sleep(random_time);
+
+    cout << "DZIEKAN PRZERYWA EGZAMIN - ALARM!" << endl;
+    kill(student, SIGINT);
+    kill(commission, SIGINT);
+}
+
+void cleanup(int msg, int sem, void* ptr1, void* ptr2, int shm) // czyszczenie istniej¹cych struktur (po przerwaniu awaryjnym)
+{
+    if (msg != -1)
+        destroy_msg(msg);
+    if (sem != -1)
+        destroy_sem(sem);
+    if (ptr1 != NULL)
+        detach_shm(ptr1);
+    if (ptr2 != NULL)
+        detach_shm(ptr2);
+    if (shm != -1)
+        destroy_shm(shm);
+}
+
+int get_direction() // pobranie kierunku pisz¹cego egzamin przez u¿ytkownika
 {
     string input;
     while (true)

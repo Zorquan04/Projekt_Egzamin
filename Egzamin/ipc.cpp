@@ -18,7 +18,7 @@ int create_shm(key_t key, size_t size)
 
 void* attach_shm(int shmid) 
 {
-    void* addr = shmat(shmid, nullptr, 0); // do³¹cza segment pamiêci do przestrzeni adresowej procesu
+    void* addr = shmat(shmid, NULL, 0); // do³¹cza segment pamiêci do przestrzeni adresowej procesu
     if (addr == (void*)-1) handle_error("Blad podczas dolaczania pamieci wspoldzielonej");
     return addr;
 }
@@ -30,7 +30,7 @@ void detach_shm(void* shmaddr)
 
 void destroy_shm(int shmid) 
 {
-    if (shmctl(shmid, IPC_RMID, nullptr) == -1) handle_error("Blad podczas niszczenia pamieci wspoldzielonej"); // usuwa segment pamiêci z systemu
+    if (shmctl(shmid, IPC_RMID, NULL) == -1) handle_error("Blad podczas niszczenia pamieci wspoldzielonej"); // usuwa segment pamiêci z systemu
 }
 
 // semafory
@@ -38,7 +38,6 @@ int create_sem(key_t key, int semnum)
 {
     int semid = semget(key, semnum, IPC_CREAT | 0666); // tworzy zestaw semaforów o podanym kluczu i liczbie semaforów
     if (semid == -1) handle_error("Blad podczas tworzenia semaforow");
-    
     return semid;
 }
 
@@ -80,8 +79,7 @@ void send_msg(int msgid, long mtype, const string& text) // wys³anie komunikatu 
     strncpy(msg.mtext, text.c_str(), sizeof(msg.mtext) - 1); // kopiowanie treœci
     msg.mtext[sizeof(msg.mtext) - 1] = '\0'; // gwarancja poprawnego zakoñczenia ³añcucha
 
-    if (msgsnd(msgid, &msg, sizeof(msg.mtext), 0) == -1)
-        handle_error("Blad podczas wysylania wiadomosci");
+    if (msgsnd(msgid, &msg, sizeof(msg.mtext), 0) == -1) handle_error("Blad podczas wysylania wiadomosci");
 }
 
 string receive_msg(int msgid, long mtype) // odebranie komunikatu o okreœlonym typie i treœci z kolejki
@@ -92,14 +90,11 @@ string receive_msg(int msgid, long mtype) // odebranie komunikatu o okreœlonym t
         char mtext[256];
     } msg = {};
 
-    if (msgrcv(msgid, &msg, sizeof(msg.mtext), mtype, 0) == -1)
-        handle_error("Blad podczas odbierania wiadomosci");
-
+    if (msgrcv(msgid, &msg, sizeof(msg.mtext), mtype, 0) == -1) handle_error("Blad podczas odbierania wiadomosci");
     return string(msg.mtext); // zwrócenie treœci komunikatu jako string
 }
 
 void destroy_msg(int msgid) 
 {
-    if (msgctl(msgid, IPC_RMID, nullptr) == -1) // usuniêcie kolejki komunikatów z systemu
-        handle_error("Blad podczas niszczenia kolejki komunikatow");
+    if (msgctl(msgid, IPC_RMID, NULL) == -1) handle_error("Blad podczas niszczenia kolejki komunikatow"); // usuniêcie kolejki komunikatów z systemu     
 }
