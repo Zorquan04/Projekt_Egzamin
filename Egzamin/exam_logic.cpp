@@ -2,12 +2,15 @@
 #include "structures.h"
 #include "constants.h"
 #include "ipc.h"
+#include <thread>
 
 void generate_students(int num_directions, int min_students, int max_students, Student* students)
 {
 	srand(static_cast<unsigned int>(time(NULL))); // inicjalizacja generatora losowego
 
+	int total_students = 0; // globalny licznik studentów
 	int student_id = 1; // globalny licznik dla id studentów (dla przydzielania unikalnego ID)
+	// generowanie wszystkich studentów i dodanie ich do pamiêci wspó³dzielonej - listy
 	for (int direction = 0; direction < num_directions; ++direction)
 	{
 		int num_students = rand() % (max_students - min_students + 1) + min_students; // generowanie liczby studentów odpowiadaj¹cej zakresowi podanemu w argumentach
@@ -24,55 +27,92 @@ void generate_students(int num_directions, int min_students, int max_students, S
 				student.practic_pass = true;
 			}
 			// krytyczna sekcja – dodanie studenta do pamiêci wspó³dzielonej
-			students[student.id - 1] = student;
-
-			cout << "Przybyl student ID: " << student.id << ", Kierunek: " << student.direction 
-				<< ", Powtarza egzamin: " << (student.practic_pass ? "Tak" : "Nie") << endl;
-
-			// symulacja losowego czasu pojawiania siê studentów
-			int delay = rand() % 91 + 10; // losowy czas w milisekundach (10-100 ms)
-			usleep(delay * 1000); // konwersja na mikrosekundy
+			students[total_students++] = student;	
 		}
+	}
+
+	// symulacja losowego pojawiania siê studentów przed uczelni¹
+	int remaining = total_students;
+	int random[total_students];
+	for (int i = 0; i < total_students; ++i)
+		random[i] = i;  // wype³nienie tablicy do wyœwietlenia losowego
+
+	while (remaining > 0)
+	{
+		int rand_index = rand() % remaining;  // losowy wybór indeksu z dostêpnych
+		int selec_index = random[rand_index];
+
+		// wyœwietlenie danych wybranego studenta
+		cout << "Przybyl student ID: " << students[selec_index].id << ", Kierunek: " << students[selec_index].direction
+			<< ", Powtarza egzamin: " << (students[selec_index].practic_pass ? "Tak" : "Nie") << endl;
+
+		// usuniêcie wybranego indeksu poprzez nadpisanie go ostatnim elementem - w celu unikniêcia duplikatów
+		random[rand_index] = random[remaining - 1];
+		remaining--;
+
+		// losowy czas pojawiania siê studentów (1-10 ms)
+		int delay = rand() % 10 + 1;
+		usleep(delay * 1000);
 	}
 }
 
-void simulate_answers(Student& student)
+void simulate_answers(Student& student, char x)
 {
-	// symulacja zadawania pytania przez komisjê
-	int delay_chance = rand() % 100; // losowanie liczby z przedzia³u 0 - 99 w celu ustalenia, czy komisja siê spóŸni³a z pytaniem
-	int question_delay = 0;
-	if (delay_chance > 49) // 50% szans, ¿e komisja siê spóŸni
+	// symulacja zadawania pytañ przez komisjê X
+	int answer_delay = ANSWER_TIME;
+
+	if (x == 'B' && !student.practic_pass) // jeœli praktyka nie zdana - teoria automatycznie tak¿e nie zdana
 	{
-		question_delay = rand() % 50 + 1; // losowy czas (1-50 ms)
-		usleep(question_delay * 1000);
+		student.theoric_grade = 2.0; 
+		return;
+	}
+	else if (x == 'A' && student.practic_pass) // jeœli student powtarza egzamin - przechodzi odrazu do teorii
+	{
+		return;
+	}
+	else
+	{
+		for (int i = 1; i < 4; i++) // symulacja opóŸnieñ przy zadawaniu pytañ i odpowiadaniu
+		{
+			int delay_chance = rand() % 100; // losowanie liczby z przedzia³u 0 - 99 w celu ustalenia, czy komisja siê spóŸni³a z pytaniem
+			int question_delay = 0;
+			if (delay_chance > 49) // 50% szans, ¿e komisja siê spóŸni
+			{
+				question_delay = rand() % 50 + 1; // losowy czas (1-50 ms)
+				usleep(question_delay * 1000);
+			}
+			if (x == 'A')
+				cout << "Komisja A zadala " << i << " pytanie po " << question_delay << " ms." << endl;
+			if (x == 'B')
+				cout << "Komisja B zadala " << i << " pytanie po " << question_delay << " ms." << endl;
+
+			usleep(answer_delay * 1000); // 10ms czasu na odpowiedŸ dla studenta
+
+			cout << "Student odpowiedzial na " << i << " pytanie w wyznaczonym czasie (" << answer_delay << " ms)." << endl;
+		}
 	}
 
-	cout << "Komisja zadala pytanie po " << question_delay << " ms." << endl;
-
-	// symulacja odpowiadania studenta
-	int answer_delay = rand() % 91 + 10; // losowy czas (10-100 ms)
-	usleep(answer_delay * 1000);
-
-	cout << "Student odpowiedzial po " << answer_delay << " ms." << endl;
-
-	if (!student.practic_pass) // jeœli student nie ma jeszcze zdanej praktyki podchodzi do niej
+	if (x == 'A') // wystawienie oceny za praktykê przez przewodnicz¹cego Komisji A
 	{
-		int random_practic = rand() % 100; // losowanie liczby z przedzia³u 0-99 w celu ustalenia, czy ocena bêdzie pozytywna
-
-		// losowanie oceny dla praktyki
-		if (random_practic < 95) // 95% szans na ocenê pozytywn¹
+		if (!student.practic_pass) // jeœli student nie ma jeszcze zdanej praktyki podchodzi do niej 
 		{
-			int grade_i = rand() % 5;
-			student.practic_grade = GRADES[grade_i]; // losuje ocenê od 3.0 do 5.0
-		}
-		else // 5% szans na ocenê negatywn¹
-			student.practic_grade = 2.0;
+			int random_practic = rand() % 100; // losowanie liczby z przedzia³u 0-99 w celu ustalenia, czy ocena bêdzie pozytywna
 
-		// przydzielanie zaliczeñ (jeœli 2.0 zwraca false)
-		student.practic_pass = (student.practic_grade > 2.0);
+			// losowanie oceny dla praktyki
+			if (random_practic < 95) // 95% szans na ocenê pozytywn¹
+			{
+				int grade_i = rand() % 5;
+				student.practic_grade = GRADES[grade_i]; // losuje ocenê od 3.0 do 5.0
+			}
+			else // 5% szans na ocenê negatywn¹
+				student.practic_grade = 2.0;
+
+			// przydzielanie zaliczeñ (jeœli 2.0 zwraca false)
+			student.practic_pass = (student.practic_grade > 2.0);
+		}
 	}
 	
-	if (student.practic_pass) // jeœli student zda³ praktykê podchodzi do teorii
+	if (x == 'B') // wystawienie oceny za teoriê przez przewodnicz¹cego Komisji B
 	{
 		int random_theoric = rand() % 100;
 
@@ -87,12 +127,6 @@ void simulate_answers(Student& student)
 
 		student.theoric_pass = (student.theoric_grade > 2.0);
 	}
-	else
-	{
-		student.theoric_grade = 2.0; // jeœli praktyka nie zdana - teoria automatycznie tak¿e nie zdana
-		student.theoric_pass = false;
-	}
-	
 }
 
 float calculate_final_grade(const Student& student)

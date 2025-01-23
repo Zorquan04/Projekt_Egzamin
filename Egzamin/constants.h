@@ -8,4 +8,6 @@ const int MAX_STUDENTS = 160; // maksymalna liczba studentów
 
 const float GRADES[] = {3.0, 3.5, 4.0, 4.5, 5.0 }; // wszystke oceny pozytywne
 
+const int ANSWER_TIME = 10; // czas na odpowiedŸ na pytanie od komisji
+
 #endif

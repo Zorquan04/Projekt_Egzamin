@@ -4,6 +4,6 @@
   Weryfikowanie architektury
   Rozpoczynanie kompilacji zdalnej
   Kompilowanie źródeł:
-  main_dean.cpp
+  main_commission_a.cpp
   Łączenie obiektów
-  DeanApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\DeanApp\bin\x64\Debug\DeanApp.out
+  CommissionAApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\CommissionAApp\bin\x64\Debug\CommissionAApp.out

@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "ipc.h"
+#include "constants.h"
 
 void handle_error(const string& message) // obs³uga b³êdów
 {
@@ -7,7 +8,7 @@ void handle_error(const string& message) // obs³uga b³êdów
     raise(SIGINT); // wys³anie sygna³u przerwania
 }
 
-void send_signal(pid_t student, pid_t commission, pid_t dean) // przes³anie sygna³u o awarii oraz zakoñczenie procesów
+void send_signal(pid_t student, pid_t commissionA, pid_t commissionB) // przes³anie sygna³u o awarii oraz zakoñczenie procesów
 {
     srand(static_cast<unsigned int>(time(NULL)));
     int random_time = rand() % 11 + 10; // miêdzy 10 a 20s od wys³ania informacji o kierunku do studentów
@@ -15,20 +16,20 @@ void send_signal(pid_t student, pid_t commission, pid_t dean) // przes³anie sygn
 
     cout << "DZIEKAN PRZERYWA EGZAMIN - ALARM!" << endl;
     kill(student, SIGINT);
-    kill(commission, SIGINT);
+    kill(commissionA, SIGINT);
+    kill(commissionB, SIGINT);
+    cout << "Komisja B przeslala wyniki do dziekana." << endl;
 }
 
-void cleanup(int msg, int sem, void* ptr1, void* ptr2, int shm) // czyszczenie istniej¹cych struktur (po przerwaniu awaryjnym)
+void cleanup(int msg, int sem, void* ptr, int shm) // czyszczenie istniej¹cych struktur (po przerwaniu awaryjnym)
 {
-    if (msg != -1)
+    if (msg && msg != -1)
         destroy_msg(msg);
-    if (sem != -1)
+    if (sem && sem != -1)
         destroy_sem(sem);
-    if (ptr1 != NULL)
-        detach_shm(ptr1);
-    if (ptr2 != NULL)
-        detach_shm(ptr2);
-    if (shm != -1)
+    if (ptr && ptr != NULL)
+        detach_shm(ptr);
+    if (shm && shm != -1)
         destroy_shm(shm);
 }
 

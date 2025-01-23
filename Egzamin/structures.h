@@ -17,7 +17,7 @@ struct Student // struktura studenta
 	Student() : id(0), direction(0), practic_pass(false), theoric_pass(false), practic_grade(0.0), theoric_grade(0.0) {} // konstruktor domyœlny
 };
 
-struct Exam_result // struktura do komunikacji z dziekanem
+struct Exam_result // struktura listy wyników egzaminu
 {
 	int student_id; // id studenta zdaj¹cego egzamin
 	float final_grade; // finalna ocena za ca³y egzamin
