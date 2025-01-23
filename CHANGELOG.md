@@ -30,3 +30,6 @@
 
 22.01.25
 - Następne poprawki oraz funkcjonalności (praca z procesami, sygnałami itd)
+
+24.01.25
+- Finalne poprawki oraz nowe funkcjonalności (podział komisji, lepsza synchronizacja itd)
