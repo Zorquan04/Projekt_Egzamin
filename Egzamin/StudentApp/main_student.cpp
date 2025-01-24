@@ -72,7 +72,7 @@ int main()
     {
         if (all_students[i].direction == target_direction)
         {
-            filtered_students[i] = all_students[i]; // jeœli student jest z odpowiedniego kierunku zostaje dodany do listy egzaminacyjnej
+            filtered_students[total] = all_students[i]; // jeœli student jest z odpowiedniego kierunku zostaje dodany do listy egzaminacyjnej
             ++total;
         }
     }
@@ -98,7 +98,7 @@ int main()
 
         for (int j = 0; j < 3 && (i + j) < total; ++j)
         {
-            string student_msg = to_string(filtered_students[i + j].id);
+            string student_msg = to_string(i + j);
             send_msg(msgid_com, 1, student_msg); // wysy³anie komunikatu o dostêpnoœci konkretnego studenta
             cout << "Student o ID = " << filtered_students[i + j].id << " wyslany do komisji A." << endl;
         }

@@ -4,9 +4,6 @@
   Weryfikowanie architektury
   Rozpoczynanie kompilacji zdalnej
   Kompilowanie źródeł:
-  exam_logic.cpp
-  ipc.cpp
-  utils.cpp
   main_student.cpp
   Łączenie obiektów
   StudentApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\StudentApp\bin\x64\Debug\StudentApp.out

@@ -26,7 +26,7 @@ int main()
     shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
     shm_ptr = attach_shm(shmid); // do³¹czanie pamiêci wspó³dzielonej
 
-    usleep(1500000);
+    sleep(1);
 
     cout << "[" << getpid() << "] Komisja B gotowa do pracy." << endl;
 
@@ -45,13 +45,13 @@ int main()
             string student_msg = receive_msg(msgid_com, 1);
             if (student_msg == "END") goto end_exam;
 
-            int id = 0;
+            int index = 0;
             if (!student_msg.empty() && all_of(student_msg.begin(), student_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
-                id = stoi(student_msg); // student_msg zawiera id studenta
+                index = stoi(student_msg); // student_msg zawiera index studenta w pamiêci wspó³dzielonej
             else
                 handle_error("Nieprawidlowy komunikat");
 
-            Student student = students[id - 1]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej, ktory zdal praktyke - listy
+            Student student = students[index]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej, ktory zdal praktyke - listy
 
             usleep(100000);
 
@@ -60,12 +60,12 @@ int main()
             simulate_answers(student, 'B'); // symulujemy zadawanie pytañ i odpowiedzi dla studenta z listy
 
             // zapisanie wyników do pamiêci
-            students[id - 1].theoric_grade = student.theoric_grade;
-            students[id - 1].theoric_pass = student.theoric_pass;
+            students[index].theoric_grade = student.theoric_grade;
+            students[index].theoric_pass = student.theoric_pass;
 
             cout << "Komisja B ocenila studenta o ID = " << student.id << " za teorie: " << student.theoric_grade << endl << endl;
 
-            string result_msg = to_string(student.id);
+            string result_msg = to_string(index);
             send_msg(msgid_dean, 1, result_msg); // wysy³anie informacji o studencie koñcz¹cym egzamin do dziekana
         }
 

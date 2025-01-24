@@ -30,7 +30,7 @@ int main()
 	shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
 	shm_ptr = attach_shm(shmid); // do³¹czanie pamiêci wspó³dzielonej
 
-	sleep(1);
+	usleep(1500000);
 
 	cout << "[" << getpid() << "] Komisja A gotowa do pracy." << endl;
 
@@ -55,25 +55,25 @@ int main()
 				goto end_exam;
 			}
 
-			int id = 0; // zmienna przechowuj¹ca id studenta otrzymanego z komunikatu
+			int index = 0; // zmienna przechowuj¹ca id studenta otrzymanego z komunikatu
 			if (!student_msg.empty() && all_of(student_msg.begin(), student_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
-				id = stoi(student_msg); // student_msg zawiera id studenta
+				index = stoi(student_msg); // student_msg zawiera index studenta w pamiêci wspó³dzielonej
 			else
 				handle_error("Nieprawidlowy komunikat");
 
-			Student student = students[id - 1]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej - listy
+			Student student = students[index]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej - listy
 
 			cout << "Komisja A przyjmuje studenta o ID = " << student.id << endl;
 
 			simulate_answers(student, 'A'); // symulujemy zadawanie pytañ i odpowiedzi dla studenta z listy
 
 			// zapisanie wyników do pamiêci
-			students[id - 1].practic_grade = student.practic_grade;
-			students[id - 1].practic_pass = student.practic_pass;
+			students[index].practic_grade = student.practic_grade;
+			students[index].practic_pass = student.practic_pass;
 
 			cout << "Komisja A ocenila studenta o ID = " << student.id << " za praktyke: " << student.practic_grade << endl << endl;
 
-			string result_msg = to_string(student.id);
+			string result_msg = to_string(index);
 			send_msg(msgid_com, 1, result_msg); // wysy³anie do komisji B
 		}
 
