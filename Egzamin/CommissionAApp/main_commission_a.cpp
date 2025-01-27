@@ -30,9 +30,9 @@ int main()
 	shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
 	shm_ptr = attach_shm(shmid); // do³¹czanie pamiêci wspó³dzielonej
 
-	usleep(1500000);
+	//usleep(1500000);
 
-	cout << "[" << getpid() << "] Komisja A gotowa do pracy." << endl;
+	cout << yellow("[") << getpid() << yellow("] Komisja A gotowa do pracy.") << endl;
 
 	// odbieranie studentów z pamiêci wspó³dzielonej
 	Student* students = static_cast<Student*>(shm_ptr);
@@ -40,7 +40,7 @@ int main()
 	// przeprowadzanie czêœci praktycznej
 	while (true)
 	{
-		usleep(500000); // argument w mikrosekundach - 0.5s
+		//usleep(500000); // argument w mikrosekundach - 0.5s
 
 		sem_wait(semid_stu, 1); // oczekiwanie na powiadomienie od studentów
 
@@ -49,7 +49,7 @@ int main()
 			string student_msg = receive_msg(msgid_stu, 1); // odbieranie komunikatu o studentach
 			if (student_msg == "END") // sprawdzenie czy ju¿ komunikat koñcowy
 			{
-				cout << "[" << getpid() << "] Wyslanie studentow do komisji B." << endl;
+				cout << yellow("[") << getpid() << yellow("] Wyslanie studentow do komisji B.") << endl;
 				send_msg(msgid_com, 1, "END"); // powiadomienie komisji B o zakoñczeniu pracy ze studentami
 				sem_signal(semid_com, 1);
 				goto end_exam;
@@ -59,11 +59,11 @@ int main()
 			if (!student_msg.empty() && all_of(student_msg.begin(), student_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
 				index = stoi(student_msg); // student_msg zawiera index studenta w pamiêci wspó³dzielonej
 			else
-				handle_error("Nieprawidlowy komunikat");
+				handle_error(red("Nieprawidlowy komunikat"));
 
 			Student student = students[index]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej - listy
 
-			cout << "Komisja A przyjmuje studenta o ID = " << student.id << endl;
+			cout << yellow("Komisja A przyjmuje studenta o ID = ") << student.id << endl;
 
 			simulate_answers(student, 'A'); // symulujemy zadawanie pytañ i odpowiedzi dla studenta z listy
 
@@ -71,13 +71,13 @@ int main()
 			students[index].practic_grade = student.practic_grade;
 			students[index].practic_pass = student.practic_pass;
 
-			cout << "Komisja A ocenila studenta o ID = " << student.id << " za praktyke: " << student.practic_grade << endl << endl;
+			cout << yellow("Komisja A ocenila studenta o ID = ") << student.id << yellow(" za praktyke: ") << student.practic_grade << endl << endl;
 
 			string result_msg = to_string(index);
 			send_msg(msgid_com, 1, result_msg); // wysy³anie do komisji B
 		}
 
-		cout << "[" << getpid() << "] Wyslanie studentow do komisji B." << endl;
+		cout << yellow("[") << getpid() << yellow("] Wyslanie studentow do komisji B.") << endl;
 		
 		sem_signal(semid_com, 1); // powiadomienie komisji B, ¿e max trójka studentów jest gotowa
 		sem_wait(semid_com, 0); // oczekiwanie na zakoñczenie egzaminowania przez komisjê B
@@ -86,7 +86,7 @@ int main()
 	}
 
 	end_exam:
-	cout << "[" << getpid() << "] Komisja A przeslala wszystkie wyniki do Komisji B." << endl;
+	cout << yellow("[") << getpid() << yellow("] Komisja A przeslala wszystkie wyniki do Komisji B.") << endl;
 
 	destroy_msg(msgid_stu); // usuniêcie kolejki komunikatów ze studentami
 	destroy_sem(semid_stu); // usuniêcie semaforów do obs³ugi studentów
@@ -94,17 +94,17 @@ int main()
 
 	// cleanup(msgid_stu, semid_stu, shm_ptr, shmid_stu); lub z pomoc¹ funkcji cleanup
 
-	cout << "[" << getpid() << "] Komisja A konczy prace." << endl << endl;
+	cout << yellow("[") << getpid() << yellow("] Komisja A konczy prace.") << endl << endl;
 
 	return 0;
 }
 
 void handle_signal(int signum)  // obs³uga czyszczenia zasobów dla komisji A
 {
-	usleep(500000);
+	//usleep(500000);
 	send_msg(msgid_com, 1, "END"); // awaryjne powiadomienie komisji B o zakoñczeniu egzaminowania
-	cout << "Komisja A przerywa proces egzaminu." << endl;
+	cout << yellow("Komisja A przerywa proces egzaminu.") << endl;
 	cleanup(msgid_stu, semid_stu, shm_ptr, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
-	cout << "Wyczyszczono zasoby dla komisji A." << endl;
+	cout << yellow("Wyczyszczono zasoby dla komisji A.") << endl;
 	exit(EXIT_SUCCESS);
 }

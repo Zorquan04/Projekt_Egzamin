@@ -27,7 +27,7 @@ int main()
 	shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS);
 	shm_ptr = attach_shm(shmid); // do³¹czenie pamiêci wspó³dzielonej
 
-	cout << "[" << getpid() << "] Dziekan uruchamia proces egzaminu." << endl;
+	cout << purple("[") << getpid() << purple("] Dziekan uruchamia proces egzaminu.") << endl;
 
 	// uruchomienie procesów komisji oraz studenta
 	const char* process[] = { "./commissionB", "./commissionA", "./student" };
@@ -39,10 +39,10 @@ int main()
 		switch (pid[i])
 		{
 		case -1:
-			handle_error("Blad podczas tworzenia procesu");
+			handle_error(red("Blad podczas tworzenia procesu"));
 		case 0:
 			execlp(process[i], process[i], NULL);
-			handle_error("Blad podczas uruchamiania procesu");
+			handle_error(red("Blad podczas uruchamiania procesu"));
 		default:
 			break;
 		}
@@ -50,16 +50,16 @@ int main()
 
 	// dziekan wybiera kierunek, który bêdzie pisa³ egzamin
 	sem_wait(semid, 0); // czekamy a¿ studenci bêd¹ gotowi
-	sleep(1);
+	//sleep(1);
 	int direction = get_direction(); // u¿ytkownik wybiera kierunek
 
-	cout << "[" << getpid() << "] Dziekan wybral kierunek, ktory podejdzie do egzaminu: " << direction << endl;
+	cout << purple("[") << getpid() << purple("] Dziekan wybral kierunek, ktory podejdzie do egzaminu: ") << direction << endl;
 
 	// wys³anie informacji do studentów
 	send_msg(msgid_stu, 1, to_string(direction));
-	cout << "Informacja o kierunku wyslana do studentow." << endl;
+	cout << purple("Informacja o kierunku wyslana do studentow.") << endl;
 
-	cout << "Oczekiwanie na wyniki od komisji..." << endl << endl;
+	cout << purple("Oczekiwanie na wyniki od komisji...") << endl << endl;
 	
 	srand(static_cast<unsigned int>(time(NULL)));
 	int is_alarm = rand() % 2; // 50% szans na wywo³anie alarmu przez dziekana
@@ -77,7 +77,7 @@ int main()
 		if (!result_msg.empty() && all_of(result_msg.begin(), result_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
 			total_students = stoi(result_msg); // student_msg zawiera id studenta
 		else
-			handle_error("Nieprawidlowy komunikat");
+			handle_error(red("Nieprawidlowy komunikat"));
 	}
 
 	// przyporz¹dkowywanie oceny finalnej oraz zaliczenia ka¿demu studentowi z pamiêci wspóldzielonej
@@ -90,32 +90,32 @@ int main()
 		results[i].passed = students[i].practic_pass && students[i].theoric_pass;
 	}
 
-	usleep(250000);
-	cout << "[" << getpid() << "] Dziekan otrzymal wyniki od komisji." << endl << endl;
-	sleep(2);
+	//usleep(250000);
+	cout << purple("[") << getpid() << purple("] Dziekan otrzymal wyniki od komisji.") << endl << endl;
+	//sleep(2);
 
 	// wypisanie wyników egzaminu
-	cout << "[" << getpid() << "] Publikowanie wynikow:" << endl;
+	cout << purple("[") << getpid() << purple("] Publikowanie wynikow:") << endl;
  
 	int passed_students = 0; // liczba zaliczeñ
 
 	for (int i = 0; i < total_students; ++i)
 	{
 		Exam_result result = results[i]; // wypisywanie wyników pozyskanych z pamiêci komisji
-		cout << "Student ID: " << result.student_id << ", Ocena: " << result.final_grade
-			<< ", Zaliczenie: " << (result.passed ? "Tak" : "Nie") << endl;
+		cout << purple("Student ID: ") << result.student_id << purple(", Ocena: ") << result.final_grade
+			<< purple(", Zaliczenie: ") << (result.passed ? purple("Tak") : purple("Nie")) << endl;
 
 		if (result.passed)
 			passed_students++; // zliczanie zaliczeñ
 
-		usleep(50000); // 0.05s opóŸnienia
+		//usleep(50000); // 0.05s opóŸnienia
 	}
 
-	sleep(1);
-	cout << endl << "Liczba studentow, ktorzy podeszli do egzaminu: " << total_students << endl;
-	cout << "Liczba studentow, ktorzy zdali: " << passed_students << " (" << (100.0 * passed_students / total_students) << "%)" << endl;
+	//sleep(1);
+	cout << endl << purple("Liczba studentow, ktorzy podeszli do egzaminu: ") << total_students << endl;
+	cout << purple("Liczba studentow, ktorzy zdali: ") << passed_students << purple(" (") << (100.0 * passed_students / total_students) << purple("%)") << endl;
 
-	sleep(1);
+	//sleep(1);
 	destroy_msg(msgid_com); // usuniêcie kolejki komunikatów z komisj¹
 	destroy_sem(semid); // usuniêcie semafora ze studentami
 	detach_shm(shm_ptr); // od³aczenie wskaŸnika pamiêci wspó³dzielonej z komisj¹
@@ -125,23 +125,23 @@ int main()
 	for (int i = 0; i < 2; i++)
 	{
 		if (waitpid(pid[i], NULL, 0) == -1) // oczekiwanie na zakoñczenie wszystkich procesów potomnych
-			handle_error("Blad podczas oczekiwania na proces");	
+			handle_error(red("Blad podczas oczekiwania na proces"));
 	}
 
 	// cleanup(msgid_com, semid, shm_ptr, shmid); lub z pomoc¹ funkcji cleanup
 
-	cout << endl << "[" << getpid() << "] Dziekan konczy proces egzaminu." << endl << endl;
+	cout << endl << purple("[") << getpid() << purple("] Dziekan konczy proces egzaminu.") << endl << endl;
 	
 	return 0;
 }
 
 void handle_signal(int signum) // obs³uga czyszczenia zasobów dla dziekana
 {
-	sleep(1);
-	cout << "Dziekan przerywa proces egzaminu." << endl;
+	//sleep(1);
+	cout << purple("Dziekan przerywa proces egzaminu.") << endl;
 	cleanup(msgid_com, semid, shm_ptr, shmid); // uniwersalna funkcja czyszcz¹ca elementy ipc
 	if (results)
 		delete[] results;
-	cout << "Wyczyszczono zasoby dla dziekana." << endl;
+	cout << purple("Wyczyszczono zasoby dla dziekana.") << endl;
 	exit(EXIT_SUCCESS);
 }

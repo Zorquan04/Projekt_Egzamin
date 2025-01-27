@@ -30,16 +30,16 @@ int main()
     int shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
     shm_ptr = attach_shm(shmid); // do³¹czanie pamiêci wspó³dzielonej
 
-    sleep(2);
-    cout << "[" << getpid() << "] Rozpoczecie przybywania studentow na miejsce..." << endl << endl;
-    sleep(1);
+    //sleep(2);
+    cout << green("[") << getpid() << green("] Rozpoczecie przybywania studentow na miejsce...") << endl << endl;
+    //sleep(1);
 
     // wygenerowanie wszystkich studentów
     all_students = new Student[MAX_STUDENTS * 5]; // stworzenie tablicy przechowuj¹cej wszystkich studentów czekaj¹cych przed uczelni¹
     generate_students(NUM_DIRECTIONS, MIN_STUDENTS, MAX_STUDENTS, all_students);
 
-    cout << endl << "[" << getpid() << "] Wszyscy studenci przybyli na egzamin." << endl << endl;
-    sleep(1);
+    cout << endl << green("[") << getpid() << green("] Wszyscy studenci przybyli na egzamin.") << endl << endl;
+    //sleep(1);
 
     // liczenie studentów, którzy maj¹ ju¿ zdan¹ praktykê
     int passed_practic = 0;
@@ -51,19 +51,19 @@ int main()
         all_student++;
     }
 
-    cout << "Liczba studentow, ktorzy powtarzaja egzamin: " << passed_practic << " (" << (100.0 * passed_practic / all_student) << "%)" << endl << endl;
+    cout << green("Liczba studentow, ktorzy powtarzaja egzamin: ") << passed_practic << green(" (") << (100.0 * passed_practic / all_student) << green("%)") << endl << endl;
 
-    usleep(500000);
+    //usleep(500000);
     sem_signal(semid_dean, 0); // sygnalizacja gotowoœci do dziekana
-    cout << "[" << getpid() << "] Oczekiwanie na informacje od dziekana..." << endl;
+    cout << green("[") << getpid() << green("] Oczekiwanie na informacje od dziekana...") << endl;
 
     // odebranie informacji od dziekana na temat kierunku, który podchodzi do egzaminu
     string direction_msg = receive_msg(msgid_dean, 1); // oczekiwanie na informacjê od dziekana na temat kierunku
-    sleep(1);
-    cout << "[" << getpid() << "] Studenci dowiedzieli sie, ktory kierunek pisze egzamin." << endl << endl;
+    //sleep(1);
+    cout << green("[") << getpid() << green("] Studenci dowiedzieli sie, ktory kierunek pisze egzamin.") << endl << endl;
     int target_direction = stoi(direction_msg); // konwersja string na int
 
-    sleep(1);
+    //sleep(1);
 
     // filtrowanie studentów wed³ug kierunku - lista studentów przystêpuj¹cych do egzaminu
     Student* filtered_students = static_cast<Student*>(shm_ptr); // rzutowanie wskaŸnika do struktury Student - tablica z przefiltrowanymi studentami
@@ -77,19 +77,19 @@ int main()
         }
     }
 
-    cout << "[" << getpid() << "] Lista ID studentow podchodzacych do egzaminu:" << endl;
+    cout << green("[") << getpid() << green("] Lista ID studentow podchodzacych do egzaminu:") << endl;
     for (int i = 0; i < total; ++i)
     {
         cout << filtered_students[i].id;
         if (i == total - 1)
-            cout << ".";
+            cout << green(".");
         else
-            cout << ", ";
+            cout << green(", ");
     }
 
-    sleep(1);
-    cout << endl << endl << "[" << getpid() << "] Rozpoczecie przeprowadzania egzaminu..." << endl << endl;
-    sleep(1);
+    //sleep(1);
+    cout << endl << endl << green("[") << getpid() << green("] Rozpoczecie przeprowadzania egzaminu...") << endl << endl;
+    //sleep(1);
 
     // wysy³anie studentów do komisji A
     for (int i = 0; i < total; i += 3)
@@ -100,7 +100,7 @@ int main()
         {
             string student_msg = to_string(i + j);
             send_msg(msgid_com, 1, student_msg); // wysy³anie komunikatu o dostêpnoœci konkretnego studenta
-            cout << "Student o ID = " << filtered_students[i + j].id << " wyslany do komisji A." << endl;
+            cout << green("Student o ID = ") << filtered_students[i + j].id << green(" wyslany do komisji A.") << endl;
         }
         cout << endl;
         sem_signal(semid_com, 1); // powiadomienie komisji A o nowej trójce    
@@ -116,18 +116,18 @@ int main()
 
     // cleanup(msgid_dean, -1, shm_ptr, -1); lub z pomoc¹ funkcji cleanup
 
-    cout << endl << "[" << getpid() << "] Wszyscy studenci zostali wyslani na egzamin." << endl << endl;
+    cout << endl << green("[") << getpid() << green("] Wszyscy studenci zostali wyslani na egzamin.") << endl << endl;
 
     return 0;
 }
 
 void handle_signal(int signum) // obs³uga czyszczenia zasobów dla studenta
 {
-    usleep(250000);
-    cout << "Student przerywa proces egzaminu." << endl;
+    //usleep(250000);
+    cout << green("Student przerywa proces egzaminu.") << endl;
     cleanup(msgid_dean, -1, shm_ptr, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
     if (all_students)
         delete[] all_students;
-    cout << "Wyczyszczono zasoby dla studenta." << endl;
+    cout << green("Wyczyszczono zasoby dla studenta.") << endl;
     exit(EXIT_SUCCESS);
 }

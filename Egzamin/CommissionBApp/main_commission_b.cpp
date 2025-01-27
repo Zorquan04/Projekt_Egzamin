@@ -26,9 +26,9 @@ int main()
     shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
     shm_ptr = attach_shm(shmid); // do³¹czanie pamiêci wspó³dzielonej
 
-    sleep(1);
+    //sleep(1);
 
-    cout << "[" << getpid() << "] Komisja B gotowa do pracy." << endl;
+    cout << blue("[") << getpid() << blue("] Komisja B gotowa do pracy.") << endl;
 
     // odbieranie studentów z pamiêci wspó³dzielonej
     Student* students = static_cast<Student*>(shm_ptr);
@@ -36,7 +36,7 @@ int main()
     // przeprowadzanie czêœci teoretycznej
     while (true)
     {
-        usleep(250000);
+        //usleep(250000);
 
         sem_wait(semid, 1); // oczekiwanie na powiadomienie od komisji A
 
@@ -49,13 +49,13 @@ int main()
             if (!student_msg.empty() && all_of(student_msg.begin(), student_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
                 index = stoi(student_msg); // student_msg zawiera index studenta w pamiêci wspó³dzielonej
             else
-                handle_error("Nieprawidlowy komunikat");
+                handle_error(red("Nieprawidlowy komunikat"));
 
             Student student = students[index]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej, ktory zdal praktyke - listy
 
-            usleep(100000);
+            //usleep(100000);
 
-            cout << "Komisja B przyjmuje studenta o ID = " << student.id << endl;
+            cout << blue("Komisja B przyjmuje studenta o ID = ") << student.id << endl;
 
             simulate_answers(student, 'B'); // symulujemy zadawanie pytañ i odpowiedzi dla studenta z listy
 
@@ -63,7 +63,7 @@ int main()
             students[index].theoric_grade = student.theoric_grade;
             students[index].theoric_pass = student.theoric_pass;
 
-            cout << "Komisja B ocenila studenta o ID = " << student.id << " za teorie: " << student.theoric_grade << endl << endl;
+            cout << blue("Komisja B ocenila studenta o ID = ") << student.id << blue(" za teorie: ") << student.theoric_grade << endl << endl;
 
             string result_msg = to_string(index);
             send_msg(msgid_dean, 1, result_msg); // wysy³anie informacji o studencie koñcz¹cym egzamin do dziekana
@@ -74,7 +74,7 @@ int main()
 
     end_exam:
     send_msg(msgid_dean, 1, "END"); // powiadomienie dziekana o zakoñczeniu egzaminu
-    cout << "[" << getpid() << "] Komisja B przeslala wyniki do dziekana." << endl;
+    cout << blue("[") << getpid() << blue("] Komisja B przeslala wyniki do dziekana.") << endl;
 
     destroy_msg(msgid_com); // usuniêcie kolejki komunikatów z komisj¹ A
     destroy_sem(semid); // usuniêcie semaforów do obs³ugi komisji A
@@ -82,17 +82,17 @@ int main()
 
 	// cleanup(msgid_com, semid, shm_ptr, shmid_com); lub z pomoc¹ funkcji cleanup
 
-	cout << "[" << getpid() << "] Komisja B konczy prace." << endl << endl;
+	cout << blue("[") << getpid() << blue("] Komisja B konczy prace.") << endl << endl;
 
 	return 0;
 }
 
 void handle_signal(int signum)  // obs³uga czyszczenia zasobów dla komisji
 {
-    usleep(750000);
+    //usleep(750000);
 	send_msg(msgid_dean, 1, "END"); // awaryjne powiadomienie dziekana o zakoñczeniu egzaminowania
-	cout << "Komisja B przerywa proces egzaminu." << endl;
+	cout << blue("Komisja B przerywa proces egzaminu.") << endl;
 	cleanup(msgid_com, semid, shm_ptr, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
-	cout << "Wyczyszczono zasoby dla komisji B." << endl;
+	cout << blue("Wyczyszczono zasoby dla komisji B.") << endl;
 	exit(EXIT_SUCCESS);
 }

@@ -14,11 +14,11 @@ void send_signal(pid_t student, pid_t commissionA, pid_t commissionB) // przes³a
     int random_time = rand() % 11 + 10; // miêdzy 10 a 20s od wys³ania informacji o kierunku do studentów
     sleep(random_time);
 
-    cout << "DZIEKAN PRZERYWA EGZAMIN - ALARM!" << endl;
+    cout << red("DZIEKAN PRZERYWA EGZAMIN - ALARM!") << endl;
     kill(student, SIGINT);
     kill(commissionA, SIGINT);
     kill(commissionB, SIGINT);
-    cout << "Komisja B przeslala wyniki do dziekana." << endl;
+    cout << blue("Komisja B przeslala wyniki do dziekana.") << endl;
 }
 
 void cleanup(int msg, int sem, void* ptr, int shm) // czyszczenie istniej¹cych struktur (po przerwaniu awaryjnym)
@@ -38,7 +38,7 @@ int get_direction() // pobranie kierunku pisz¹cego egzamin przez u¿ytkownika
     string input;
     while (true)
     {
-        cout << "Wybierz numer kierunku, ktory podejdzie do egzaminu (1-5): ";
+        cout << purple("Wybierz numer kierunku, ktory podejdzie do egzaminu (1-5): ");
         getline(cin, input);
 
         try
@@ -48,11 +48,37 @@ int get_direction() // pobranie kierunku pisz¹cego egzamin przez u¿ytkownika
             if (pos == input.size() && direction >= 1 && direction <= 5) // sprawdzamy zakres oraz czy pos zawiera identyczn¹ liczbê co podana przez u¿ytkownika
                 return direction;
             else
-                cout << "Numer poza zakresem lub liczba z ulamkiem. Sprobuj ponownie." << endl;
+                cout << red("Numer poza zakresem lub liczba z ulamkiem. Sprobuj ponownie.") << endl;
         }
         catch (...)
         {
-            cout << "Nieprawidlowy typ danych. Sprobuj ponownie." << endl;
+            cout << red("Nieprawidlowy typ danych. Sprobuj ponownie.") << endl;
         }
     }
+}
+
+// funkcje do kolorowych napisów
+string green(const string& msg)
+{
+    return "\033[92m" + msg + "\033[0m";
+}
+
+string red(const string& msg)
+{
+    return "\033[91m" + msg + "\033[0m";
+}
+
+string blue(const string& msg)
+{
+    return "\033[94m" + msg + "\033[0m";
+}
+
+string yellow(const string& msg)
+{
+    return "\033[93m" + msg + "\033[0m";
+}
+
+string purple(const string& msg)
+{
+    return "\033[95m" + msg + "\033[0m";
 }

@@ -4,6 +4,6 @@
   Weryfikowanie architektury
   Rozpoczynanie kompilacji zdalnej
   Kompilowanie źródeł:
-  main_commission_b.cpp
+  utils.cpp
   Łączenie obiektów
   CommissionBApp.vcxproj -> C:\Users\kacpe\source\repos\Egzamin\CommissionBApp\bin\x64\Debug\CommissionBApp.out

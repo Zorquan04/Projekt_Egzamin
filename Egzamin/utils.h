@@ -16,4 +16,11 @@ void send_signal(pid_t, pid_t, pid_t); // wysy³anie alarmu przez dziekana
 void cleanup(int, int, void*, int); // sprz¹tanie zasobów
 int get_direction(); // pobieranie kierunku od u¿ytkownika
 
+// funkcje do kolorowych napisów
+string green(const string&);
+string red(const string&);
+string blue(const string&);
+string yellow(const string&);
+string purple(const string&);
+
 #endif

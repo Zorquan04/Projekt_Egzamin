@@ -43,8 +43,8 @@ void generate_students(int num_directions, int min_students, int max_students, S
 		int selec_index = random[rand_index];
 
 		// wyœwietlenie danych wybranego studenta
-		cout << "Przybyl student ID: " << students[selec_index].id << ", Kierunek: " << students[selec_index].direction
-			<< ", Powtarza egzamin: " << (students[selec_index].practic_pass ? "Tak" : "Nie") << endl;
+		cout << green("Przybyl student ID: ") << students[selec_index].id << green(", Kierunek: ") << students[selec_index].direction
+			<< green(", Powtarza egzamin: ") << (students[selec_index].practic_pass ? green("Tak") : green("Nie")) << endl;
 
 		// usuniêcie wybranego indeksu poprzez nadpisanie go ostatnim elementem - w celu unikniêcia duplikatów
 		random[rand_index] = random[remaining - 1];
@@ -82,13 +82,13 @@ void simulate_answers(Student& student, char x)
 				usleep(question_delay * 1000);
 			}
 			if (x == 'A')
-				cout << "Komisja A zadala " << i << " pytanie po " << question_delay << " ms." << endl;
+				cout << yellow("Komisja A zadala ") << i << yellow(" pytanie po ") << question_delay << yellow(" ms.") << endl;
 			if (x == 'B')
-				cout << "Komisja B zadala " << i << " pytanie po " << question_delay << " ms." << endl;
+				cout << blue("Komisja B zadala ") << i << blue(" pytanie po ") << question_delay << blue(" ms.") << endl;
 
-			usleep(answer_delay * 1000); // 10ms czasu na odpowiedŸ dla studenta
+			usleep(answer_delay * 1000); // 50ms czasu na odpowiedŸ dla studenta
 
-			cout << "Student odpowiedzial na " << i << " pytanie w wyznaczonym czasie (" << answer_delay << " ms)." << endl;
+			cout << green("Student odpowiedzial na ") << i << green(" pytanie w wyznaczonym czasie (") << answer_delay << green(" ms).") << endl;
 		}
 	}
 
