@@ -33,3 +33,6 @@
 
 24.01.25
 - Finalne poprawki oraz nowe funkcjonalności (podział komisji, lepsza synchronizacja itd)
+
+27.01.25
+- Finalne poprawki
