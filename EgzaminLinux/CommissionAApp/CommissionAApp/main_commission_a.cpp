@@ -5,106 +5,130 @@
 #include "exam_logic.h"
 
 void handle_signal(int);
-int msgid_stu, msgid_com, semid_stu, shmid;
+int semid_stuX, msgid;
 void* shm_ptr;
 
 int main()
 {
-	signal(SIGINT, handle_signal); // obs³uga sygna³u awaryjnego
+	signal(SIGINT, handle_signal); // obs³uga sygna³u przerwania
+	signal(SIGUSR1, handle_signal); // obs³uga sygna³u awaryjnego
 
 	// tworzenie kolejek komunikatów, semaforów oraz pamiêci wspó³dzielonej
-	key_t msg_key_stu = generate_key('B'); // inicjalizacja kolejki komunikatów ze studentami
-	msgid_stu = create_msg(msg_key_stu);
-
-	key_t msg_key_com = generate_key('C'); // inicjalizacja kolejki komunikatów z komisj¹ B
-	msgid_com = create_msg(msg_key_com);
-
-	key_t sem_key_stu = generate_key('F'); // klucz do semaforów
-	semid_stu = create_sem(sem_key_stu, 2); // zestaw semaforów: 0 - komisja A, 1 - studenci
-	semctl(semid_stu, 0, SETVAL, 1); // ustawienie wartoœci domyœlnej dla semafora odpowiedzialnego za komisjê A
-
-	key_t sem_key_com = generate_key('G'); // klucz do semaforów
-	int semid_com = create_sem(sem_key_com, 2); // zestaw semaforów: 0 - komisja A, 1 - komisja B
-
-	key_t shm_key = generate_key('H'); // inicjalizacja pamiêci wspó³dzielonej ze studentem, komisj¹ B oraz dziekanem
-	shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
+	key_t msg_key = generate_key('A'); // inicjalizacja kolejki komunikatów ze wszystkimi
+	msgid = create_msg(msg_key);
+	string start = receive_msg(msgid, 30); // czekamy na komunikat do startu
+	
+	key_t shm_key = generate_key('B'); // inicjalizacja pamiêci wspó³dzielonej ze studentem, komisjami oraz dziekanem
+	int shmid = create_shm(shm_key, sizeof(Student) * MAX_STUDENTS); // tworzenie pamiêci wspó³dzielonej
 	shm_ptr = attach_shm(shmid); // do³¹czanie pamiêci wspó³dzielonej
 
-	//usleep(1500000);
+	key_t sem_key_stuX = generate_key('D'); // semafor z ka¿dym ze studentów - kolejka max 3 osób
+	semid_stuX = create_sem(sem_key_stuX, 1);
+	semctl(semid_stuX, 0, SETVAL, 3);
 
-	cout << yellow("[") << getpid() << yellow("] Komisja A gotowa do pracy.") << endl;
+	key_t sem_key_start = generate_key('X'); // semafor przepuszczajacy ka¿dego ze studentów
+	int semid_start = create_sem(sem_key_start, 2); // domyœlnie zero - brak przejœcia
+
+	key_t sem_key_comB = generate_key('F'); // semafor z komisj¹ B
+	int semid_comB = create_sem(sem_key_comB, 1);
+
+	cout << yellow("[") << yellow(to_string(getpid())) << yellow("] Komisja A gotowa do pracy.") << endl;
+
+	send_msg(msgid, 20, "START");
 
 	// odbieranie studentów z pamiêci wspó³dzielonej
 	Student* students = static_cast<Student*>(shm_ptr);
 
 	// przeprowadzanie czêœci praktycznej
+	string msg = receive_msg(msgid, 15); // odbieramy komunikat z liczb¹ studentów aby wiedzieæ ile razy wys³aæ START
+	int count = stoi(msg);
+	semctl(semid_start, 0, SETVAL, count); // ustawienie semafora na liczbê studentów aby ka¿dy móg³ wejœæ
+
 	while (true)
 	{
-		//usleep(500000); // argument w mikrosekundach - 0.5s
-
-		sem_wait(semid_stu, 1); // oczekiwanie na powiadomienie od studentów
-
-		for (int i = 0; i < 3; ++i) // egzaminowanie trójki studentów
+		// egzaminowanie trójki studentów
+		string student_msg = receive_msg(msgid, 55); // odbieranie komunikatu o studentach
+		if (student_msg == "END") // sprawdzenie czy ju¿ komunikat koñcowy
 		{
-			string student_msg = receive_msg(msgid_stu, 1); // odbieranie komunikatu o studentach
-			if (student_msg == "END") // sprawdzenie czy ju¿ komunikat koñcowy
-			{
-				cout << yellow("[") << getpid() << yellow("] Wyslanie studentow do komisji B.") << endl;
-				send_msg(msgid_com, 1, "END"); // powiadomienie komisji B o zakoñczeniu pracy ze studentami
-				sem_signal(semid_com, 1);
-				goto end_exam;
-			}
-
-			int index = 0; // zmienna przechowuj¹ca id studenta otrzymanego z komunikatu
-			if (!student_msg.empty() && all_of(student_msg.begin(), student_msg.end(), ::isdigit)) // sprawdzenie poprawnoœci danych komunikatu
-				index = stoi(student_msg); // student_msg zawiera index studenta w pamiêci wspó³dzielonej
-			else
-				handle_error(red("Nieprawidlowy komunikat"));
-
-			Student student = students[index]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej - listy
-
-			cout << yellow("Komisja A przyjmuje studenta o ID = ") << student.id << endl;
-
-			simulate_answers(student, 'A'); // symulujemy zadawanie pytañ i odpowiedzi dla studenta z listy
-
-			// zapisanie wyników do pamiêci
-			students[index].practic_grade = student.practic_grade;
-			students[index].practic_pass = student.practic_pass;
-
-			cout << yellow("Komisja A ocenila studenta o ID = ") << student.id << yellow(" za praktyke: ") << student.practic_grade << endl << endl;
-
-			string result_msg = to_string(index);
-			send_msg(msgid_com, 1, result_msg); // wysy³anie do komisji B
+			send_msg(msgid, 25, "END"); // powiadomienie komisji B o zakoñczeniu pracy ze studentami
+			break;
 		}
 
-		cout << yellow("[") << getpid() << yellow("] Wyslanie studentow do komisji B.") << endl;
-		
-		sem_signal(semid_com, 1); // powiadomienie komisji B, ¿e max trójka studentów jest gotowa
-		sem_wait(semid_com, 0); // oczekiwanie na zakoñczenie egzaminowania przez komisjê B
+		// parsowanie wiadomoœci na ID i PID
+		size_t delimiter = student_msg.find(',');
+		if (delimiter == string::npos)
+			handle_error(red("Nieprawidlowy format komunikatu"));
 
-		sem_signal(semid_stu, 0); // poinformowanie studentów o wolnej komisji
+		string id_part = student_msg.substr(0, delimiter);
+		string pid_part = student_msg.substr(delimiter + 1);
+
+		int id = stoi(id_part);
+		int pid = stoi(pid_part);
+
+		// wyszukujemy studenta w pamiêci wspó³dzielonej na podstawie jego ID
+		int found_index = -1;
+		for (int i = 0; i < MAX_STUDENTS; i++)
+		{
+			if (students[i].id == id)
+			{
+				found_index = i;
+				break;
+			}
+		}
+		if (found_index == -1)
+			handle_error(red("Nie znaleziono studenta o podanym ID w pamieci."));
+
+		Student student = students[found_index]; // przypisanie studenta do odpowiadaj¹cego studenta z pamiêci wspó³dzielonej - listy
+
+		cout << yellow("Komisja A przyjmuje studenta [") << yellow(to_string(pid)) << yellow("] o ID = ") << student.id << endl;
+
+		int semnum = semctl(semid_stuX, 0, GETVAL);
+
+		simulate_answers(student, 'A', pid, semnum); // symulujemy zadawanie pytañ i odpowiedzi dla studenta z listy	
+
+		// zapisanie wyników do pamiêci
+		students[found_index].practic_grade = student.practic_grade;
+		students[found_index].practic_pass = student.practic_pass;
+
+		cout << yellow("Komisja A ocenila studenta [") << yellow(to_string(pid)) << yellow("] o ID = ") << student.id
+			<< yellow(" za praktyke: ") << student.practic_grade << endl << endl;
+
+		sem_wait(semid_comB, 0); // oczekiwanie na wolne miejsce w komisji B
+
+		string msg = to_string(id) + "," + to_string(pid);
+		send_msg(msgid, 25, msg); // wysy³anie do komisji B
+
+		sem_signal(semid_stuX, 0); // poinformowanie studentów o wolnej komisji
 	}
 
-	end_exam:
-	cout << yellow("[") << getpid() << yellow("] Komisja A przeslala wszystkie wyniki do Komisji B.") << endl;
+	destroy_sem(semid_stuX); // usuniêcie semaforów dla ka¿dego ze studentów
+	detach_shm(shm_ptr); // od³aczenie wskaŸnika pamiêci wspó³dzielonej ze studentem, komisjami oraz dziekanem
 
-	destroy_msg(msgid_stu); // usuniêcie kolejki komunikatów ze studentami
-	destroy_sem(semid_stu); // usuniêcie semaforów do obs³ugi studentów
-	detach_shm(shm_ptr); // od³aczenie wskaŸnika pamiêci wspó³dzielonej ze studentem, komisj¹ B oraz dziekanem
-
-	// cleanup(msgid_stu, semid_stu, shm_ptr, shmid_stu); lub z pomoc¹ funkcji cleanup
-
-	cout << yellow("[") << getpid() << yellow("] Komisja A konczy prace.") << endl << endl;
+	cout << yellow("[") << yellow(to_string(getpid())) << yellow("] Komisja A konczy prace.") << endl << endl;
 
 	return 0;
 }
 
 void handle_signal(int signum)  // obs³uga czyszczenia zasobów dla komisji A
 {
-	//usleep(500000);
-	send_msg(msgid_com, 1, "END"); // awaryjne powiadomienie komisji B o zakoñczeniu egzaminowania
-	cout << yellow("Komisja A przerywa proces egzaminu.") << endl;
-	cleanup(msgid_stu, semid_stu, shm_ptr, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
-	cout << yellow("Wyczyszczono zasoby dla komisji A.") << endl;
-	exit(EXIT_SUCCESS);
+	if (signum == SIGINT)
+	{
+		cout << yellow("Komisja A przerywa proces egzaminu.") << endl;
+
+		cleanup(-1, semid_stuX, -1, shm_ptr, NULL, -1, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
+
+		cout << yellow("Wyczyszczono zasoby dla komisji A.") << endl;
+		exit(EXIT_SUCCESS);
+	}
+
+	if (signum == SIGUSR1)
+	{
+		// send_msg(msgid, 60, "END"); // wys³anie awaryjnego komunikatu do ka¿dego ze studentów
+		cout << yellow("Komisja A przerywa proces egzaminu.") << endl;
+
+		cleanup(-1, semid_stuX, -1, shm_ptr, NULL, -1, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
+
+		cout << yellow("Wyczyszczono zasoby dla komisji A.") << endl;
+		exit(EXIT_SUCCESS);
+	}
 }

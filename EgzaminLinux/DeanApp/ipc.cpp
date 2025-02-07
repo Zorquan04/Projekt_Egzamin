@@ -44,7 +44,20 @@ int create_sem(key_t key, int semnum)
 void sem_wait(int semid, int semnum)
 {
     struct sembuf operation = { static_cast<unsigned short>(semnum), -1, 0 }; // operacja P (dekrementacja) na semaforze (zmniejsza jego wartoœæ o 1, blokuj¹c, jeœli wartoœæ wynosi 0)
-    if (semop(semid, &operation, 1) == -1) handle_error(red("Blad podczas operacji wait na semaforze"));
+    while (true)
+    {
+        if (semop(semid, &operation, 1) == -1)
+        {
+            if (errno == EINTR) // obs³uga chwilowego wstrzymania procesów g³ównych
+                continue;
+            else if (errno == EIDRM || errno == EINVAL) // semafor zosta³ usuniêty lub jest nieprawid³owy
+                exit(EXIT_SUCCESS);
+            else
+                handle_error(red("Blad podczas operacji wait na semaforze"));
+        }
+        else
+            break; // operacja sem_wait zakoñczona pomyœlnie
+    }
     // jeœli wartoœæ semafora wynosi 0, proces zostaje zablokowany, a¿ inny proces zwolni semafor
 }
 
@@ -90,8 +103,22 @@ string receive_msg(int msgid, long mtype) // odebranie komunikatu o okreœlonym t
         char mtext[256];
     } msg = {};
 
-    if (msgrcv(msgid, &msg, sizeof(msg.mtext), mtype, 0) == -1) handle_error(red("Blad podczas odbierania wiadomosci"));
-    return string(msg.mtext); // zwrócenie treœci komunikatu jako string
+    while (true)
+    {
+        if (msgrcv(msgid, &msg, sizeof(msg.mtext), mtype, 0) == -1)
+        {
+            if (errno == EINTR) // Wywo³anie przerwane przez sygna³
+            {
+                continue; // Ponów wywo³anie systemowe
+            }
+            else
+            {
+                handle_error(red("Blad podczas odbierania wiadomosci"));
+            }
+        }
+        else
+            return string(msg.mtext); // zwrócenie treœci komunikatu jako string
+    }    
 }
 
 void destroy_msg(int msgid) 

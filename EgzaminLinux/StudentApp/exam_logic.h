@@ -7,9 +7,9 @@
 #include <ctime>
 #include <cmath>
 
-void generate_students(int, int, int, Student*); // losowanie studentów na podstawie liczby kierunków oraz liczby studentów na ka¿dym z kierunków
+vector<pid_t> generate_students(int, int, int, Student*); // losowanie studentów na podstawie liczby kierunków oraz liczby studentów na ka¿dym z kierunków
 
-void simulate_answers(Student&, char); // symulacja odpowiedzi studenta oraz ocenianie
+void simulate_answers(Student&, char, pid_t, int); // symulacja odpowiedzi studenta oraz ocenianie
 
 float calculate_final_grade(const Student&); // wyliczanie œredniej oceny z obu czêœci egzaminu
 

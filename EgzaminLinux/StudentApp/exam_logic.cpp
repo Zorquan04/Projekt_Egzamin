@@ -2,14 +2,16 @@
 #include "structures.h"
 #include "constants.h"
 #include "ipc.h"
-#include <thread>
 
-void generate_students(int num_directions, int min_students, int max_students, Student* students)
+vector<pid_t> generate_students(int num_directions, int min_students, int max_students, Student* students)
 {
 	srand(static_cast<unsigned int>(time(NULL))); // inicjalizacja generatora losowego
 
-	int total_students = 0; // globalny licznik studentów
+	int total_students = 0; // globalny licznik studentów (oraz indeks)
 	int student_id = 1; // globalny licznik dla id studentów (dla przydzielania unikalnego ID)
+	vector<pid_t> child_pids; // lista PIDów procesów studenckich
+	pid_t pid = 0; // zmienna przechowuj¹ca pidy nowych procesów-studentów
+
 	// generowanie wszystkich studentów i dodanie ich do pamiêci wspó³dzielonej - listy
 	for (int direction = 0; direction < num_directions; ++direction)
 	{
@@ -26,8 +28,28 @@ void generate_students(int num_directions, int min_students, int max_students, S
 				student.practic_grade = 5.0;
 				student.practic_pass = true;
 			}
-			// krytyczna sekcja – dodanie studenta do pamiêci wspó³dzielonej
-			students[total_students++] = student;	
+			// dodanie studenta do tablicy - listy
+			students[total_students] = student;	
+
+			// stworzenie procesu studenta
+			pid = fork();
+
+			if (pid == -1)
+			{
+				handle_error(red("Blad podczas generowania procesu"));
+			}
+			else if (pid == 0)
+			{
+				// utworzenie procesu oraz przes³anie id odpowiedniego studenta jako argument (proces potomny)
+				string id = to_string(student.id);
+				execlp("./studentExec", "./studentExec", id.c_str(), NULL);
+				handle_error(red("Blad podczas uruchamiania procesu"));
+			}
+			else
+			{
+				child_pids.push_back(pid); // zapisujemy PID do wektora-tablicy (proces macierzysty)
+			}
+			total_students++;
 		}
 	}
 
@@ -37,14 +59,15 @@ void generate_students(int num_directions, int min_students, int max_students, S
 	for (int i = 0; i < total_students; ++i)
 		random[i] = i;  // wype³nienie tablicy do wyœwietlenia losowego
 
-	while (remaining > 0)
+	for (int i = 0; i < remaining; ++i)
 	{
 		int rand_index = rand() % remaining;  // losowy wybór indeksu z dostêpnych
 		int selec_index = random[rand_index];
 
 		// wyœwietlenie danych wybranego studenta
-		cout << green("Przybyl student ID: ") << students[selec_index].id << green(", Kierunek: ") << students[selec_index].direction
-			<< green(", Powtarza egzamin: ") << (students[selec_index].practic_pass ? green("Tak") : green("Nie")) << endl;
+		cout << green("Przybyl student [") << green(to_string(child_pids[selec_index])) << green("] o ID = ") << students[selec_index].id 
+			<< green(", Kierunek: ") << students[selec_index].direction << green(", Powtarza egzamin: ") 
+			<< (students[selec_index].practic_pass ? green("Tak") : green("Nie")) << endl;
 
 		// usuniêcie wybranego indeksu poprzez nadpisanie go ostatnim elementem - w celu unikniêcia duplikatów
 		random[rand_index] = random[remaining - 1];
@@ -54,42 +77,61 @@ void generate_students(int num_directions, int min_students, int max_students, S
 		int delay = rand() % 10 + 1;
 		usleep(delay * 1000);
 	}
+
+	return child_pids;
 }
 
-void simulate_answers(Student& student, char x)
+void simulate_answers(Student& student, char x, pid_t pid, int semnum)
 {
+	/*
+	if (x == 'A')
+		cout << yellow("Aktualny stan miejsc w Komisji A: ") << yellow(to_string(semnum)) << endl;
+	if (x == 'B')
+		cout << blue("Aktualny stan miejsc w Komisji B: ") << blue(to_string(semnum)) << endl;
+	*/
+
 	// symulacja zadawania pytañ przez komisjê X
-	int answer_delay = ANSWER_TIME;
+	int question_delay = 0;
 
 	if (x == 'B' && !student.practic_pass) // jeœli praktyka nie zdana - teoria automatycznie tak¿e nie zdana
 	{
 		student.theoric_grade = 2.0; 
+		cout << blue("Komisja B oblewa studenta [") << blue(to_string(pid)) << blue("] - praktyka nie zdana") << endl;
 		return;
 	}
 	else if (x == 'A' && student.practic_pass) // jeœli student powtarza egzamin - przechodzi odrazu do teorii
 	{
+		cout << yellow("Komisja A przepuszcza studenta [") << yellow(to_string(pid)) << yellow("] - powtarza egzamin") << endl;
 		return;
 	}
 	else
 	{
-		for (int i = 1; i < 4; i++) // symulacja opóŸnieñ przy zadawaniu pytañ i odpowiadaniu
+		for (int i = 0; i < 3; i++) // symulacja opóŸnieñ przy zadawaniu 3 pytañ i odpowiadaniu
 		{
 			int delay_chance = rand() % 100; // losowanie liczby z przedzia³u 0 - 99 w celu ustalenia, czy komisja siê spóŸni³a z pytaniem
-			int question_delay = 0;
+			int x_question_delay = 0;
+
 			if (delay_chance > 49) // 50% szans, ¿e komisja siê spóŸni
 			{
-				question_delay = rand() % 50 + 1; // losowy czas (1-50 ms)
-				usleep(question_delay * 1000);
+				x_question_delay = rand() % 50 + 1; // losowy czas (1-50 ms)
+				usleep(x_question_delay * 1000);
 			}
-			if (x == 'A')
-				cout << yellow("Komisja A zadala ") << i << yellow(" pytanie po ") << question_delay << yellow(" ms.") << endl;
-			if (x == 'B')
-				cout << blue("Komisja B zadala ") << i << blue(" pytanie po ") << question_delay << blue(" ms.") << endl;
+			usleep(ANSWER_TIME * 1000); // 50ms czasu na odpowiedŸ dla studenta
 
-			usleep(answer_delay * 1000); // 50ms czasu na odpowiedŸ dla studenta
-
-			cout << green("Student odpowiedzial na ") << i << green(" pytanie w wyznaczonym czasie (") << answer_delay << green(" ms).") << endl;
+			question_delay += x_question_delay;
 		}
+
+		if (x == 'A')
+		{
+			cout << yellow("Komisja A zadala 3 pytania do [") << yellow(to_string(pid)) << yellow("] po ") << question_delay << yellow(" ms.") << endl
+				<< green("Student [") << green(to_string(pid)) << green("] odpowiedzial na 3 pytania praktyczne w wyznaczonym czasie (") << (ANSWER_TIME * 3) << green(" ms).") << endl;
+		}
+			
+		if (x == 'B')
+		{
+			cout << blue("Komisja B zadala 3 pytania do [") << blue(to_string(pid)) << blue("] po ") << question_delay << blue(" ms.") << endl
+				<< green("Student [") << green(to_string(pid)) << green("] odpowiedzial na 3 pytania teoretyczne w wyznaczonym czasie (") << (ANSWER_TIME * 3) << green(" ms).") << endl;
+		}	
 	}
 
 	if (x == 'A') // wystawienie oceny za praktykê przez przewodnicz¹cego Komisji A
