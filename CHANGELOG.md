@@ -36,3 +36,7 @@
 
 27.01.25
 - Finalne poprawki
+
+7.02.25
+- Finalna wersja programu, poprawiona o brakujące elementy + nowa struktura generowania studentów
+- Dodanie do repozytorium ostatecznych opisów i instrukcji
