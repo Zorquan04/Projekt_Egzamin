@@ -40,20 +40,20 @@ int main()
     // wygenerowanie wszystkich studentów
     all_students = new Student[MAX_STUDENTS * NUM_DIRECTIONS]; // stworzenie tablicy przechowuj¹cej wszystkich studentów czekaj¹cych przed uczelni¹
     vector<pid_t> child_pids = generate_students(NUM_DIRECTIONS, MIN_STUDENTS, MAX_STUDENTS, all_students);
-    send_msg(msgid, 15, to_string(child_pids.size())); // wysy³amy liczbê studentów do Komisji A i dziekana
-    send_msg(msgid, 50, to_string(child_pids.size()));
-    memcpy(shm_ptr_pid, child_pids.data(), child_pids.size() * sizeof(pid_t)); // wysy³amy pidy studentów do dziekana w postaci wektora
+    int total_students = static_cast<int>(child_pids.size());
+
+    send_msg(msgid, 15, to_string(total_students)); // wysy³amy liczbê studentów do Komisji A i dziekana
+    send_msg(msgid, 50, to_string(total_students));
+    memcpy(shm_ptr_pid, child_pids.data(), child_pids.size() * sizeof(pid_t)); // wysy³amy pidy studentów do dziekana w postaci wektor
 
     cout << endl << green("[") << green(to_string(getpid())) << green("] Wszyscy studenci przybyli na egzamin.") << endl << endl;
 
     // liczenie studentów, którzy maj¹ ju¿ zdan¹ praktykê
     int passed_practic = 0;
-    int total_students = 0;
-    for (int i = 0; i < MAX_STUDENTS * NUM_DIRECTIONS; ++i)
+    for (int i = 0; i < total_students; ++i)
     {
         if (all_students[i].practic_pass)
             ++passed_practic;
-        total_students++;
     }
 
     cout << green("Liczba studentow, ktorzy powtarzaja egzamin: ") << passed_practic << green(" (")
@@ -69,14 +69,15 @@ int main()
 
     // filtrowanie studentów wed³ug kierunku - lista studentów przystêpuj¹cych do egzaminu
     Student* filtered_students = static_cast<Student*>(shm_ptr); // tablica z przefiltrowanymi studentami
+
     int total = 0;
-    for (int i = 0; i < MAX_STUDENTS * NUM_DIRECTIONS; ++i)
+    for (int i = 0; i < total_students; ++i)
     {
         if (all_students[i].direction == target_direction)
         {
             filtered_students[total] = all_students[i]; // jeœli student jest z odpowiedniego kierunku zostaje dodany do listy egzaminacyjnej
-            ++total;
-        }
+            total++;
+        }      
     }
 
     cout << green("[") << green(to_string(getpid())) << green("] Lista ID studentow podchodzacych do egzaminu:") << endl;
@@ -92,7 +93,7 @@ int main()
     cout << endl << endl << green("[") << green(to_string(getpid())) << green("] Rozpoczecie przeprowadzania egzaminu...") << endl << endl;
 
     // zasygnalizowanie ka¿demu studentowi gotowej tablicy-listy w pamiêci
-    for (size_t i = 0; i < child_pids.size(); i++)
+    for (int i = 0; i < total_students; i++)
         sem_signal(semid_stuX, 0);
 
     int count = 0;

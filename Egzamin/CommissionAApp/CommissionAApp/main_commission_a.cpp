@@ -29,9 +29,6 @@ int main()
 	key_t sem_key_start = generate_key('X'); // semafor przepuszczajacy ka¿dego ze studentów
 	int semid_start = create_sem(sem_key_start, 2); // domyœlnie zero - brak przejœcia
 
-	key_t sem_key_comB = generate_key('F'); // semafor z komisj¹ B
-	int semid_comB = create_sem(sem_key_comB, 1);
-
 	cout << yellow("[") << yellow(to_string(getpid())) << yellow("] Komisja A gotowa do pracy.") << endl;
 
 	send_msg(msgid, 20, "START");
@@ -93,10 +90,7 @@ int main()
 		cout << yellow("Komisja A ocenila studenta [") << yellow(to_string(pid)) << yellow("] o ID = ") << student.id
 			<< yellow(" za praktyke: ") << student.practic_grade << endl << endl;
 
-		sem_wait(semid_comB, 0); // oczekiwanie na wolne miejsce w komisji B
-
-		string msg = to_string(id) + "," + to_string(pid);
-		send_msg(msgid, 25, msg); // wysy³anie do komisji B
+		send_msg(msgid, 45, "START");
 
 		sem_signal(semid_stuX, 0); // poinformowanie studentów o wolnej komisji
 	}
@@ -111,19 +105,8 @@ int main()
 
 void handle_signal(int signum)  // obs³uga czyszczenia zasobów dla komisji A
 {
-	if (signum == SIGINT)
+	if (signum == SIGINT || signum == SIGUSR1)
 	{
-		cout << yellow("Komisja A przerywa proces egzaminu.") << endl;
-
-		cleanup(-1, semid_stuX, -1, shm_ptr, NULL, -1, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc
-
-		cout << yellow("Wyczyszczono zasoby dla komisji A.") << endl;
-		exit(EXIT_SUCCESS);
-	}
-
-	if (signum == SIGUSR1)
-	{
-		// send_msg(msgid, 60, "END"); // wys³anie awaryjnego komunikatu do ka¿dego ze studentów
 		cout << yellow("Komisja A przerywa proces egzaminu.") << endl;
 
 		cleanup(-1, semid_stuX, -1, shm_ptr, NULL, -1, -1); // uniwersalna funkcja czyszcz¹ca elementy ipc

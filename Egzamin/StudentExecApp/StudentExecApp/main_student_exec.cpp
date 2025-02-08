@@ -33,6 +33,9 @@ int main(int argc, char* argv[])
     key_t sem_key_comA = generate_key('D'); // semafor z komisj¹ A
     int semid_comA = create_sem(sem_key_comA, 1);
 
+    key_t sem_key_comB = generate_key('F'); // semafor z komisj¹ B
+    int semid_comB = create_sem(sem_key_comB, 1);
+
     key_t sem_key_start = generate_key('X'); // semafor przepuszczaj¹cy ka¿dego ze studentów
     int semid_start = create_sem(sem_key_start, 2); // domyœlnie zero - brak przejœcia
 
@@ -61,11 +64,16 @@ int main(int argc, char* argv[])
 
     sem_wait(semid_comA, 0); // czekamy, a¿ bêdzie miejsce w komisji A
 
-    // wchodzimy do Komisji A
     string msg = to_string(my_student.id) + "," + to_string(getpid());  // format: "ID,PID"
-    send_msg(msgid, 55, msg);
-    send_msg(msgid, 5, msg);
+    send_msg(msgid, 55, msg); // wejœcie do komisji A
+    send_msg(msgid, 5, msg); // informacja dla studenta macierzystego
     
+    string result = receive_msg(msgid, 45);
+
+    sem_wait(semid_comB, 0); // oczekiwanie na wolne miejsce w komisji B
+
+    send_msg(msgid, 25, msg); // wejœcie do komisji B
+
     // czekamy na wyniki egzaminu i opuszczamy uczelniê
     sem_wait(semid_start, 1);
 
